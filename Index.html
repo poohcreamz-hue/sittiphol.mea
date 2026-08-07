@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบลงชื่อเข้างานและติดตามภาระงานประจำวัน</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* ==========================================
+           LOGIN SCREEN STYLES
+           ========================================== */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .login-field {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .login-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .login-field input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: #1f618d;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.88em;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ==========================================
+           MAIN CONTENT & NAVIGATION
+           ========================================== */
+        .main-app {
+            display: none; /* ซ่อนไว้จนกว่าจะ Login สำเร็จ */
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* Header & Navigation Bar */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #bdc3c7;
+        }
+
+        .nav-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none; /* ซ่อนแต่ละหน้าไว้แล้วสลับด้วย JS */
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: #219150;
+        }
+
+        .btn-print {
+            background-color: #2980b9;
+        }
+
+        .btn-print:hover {
+            background-color: #1f618d;
+        }
+
+        .btn-logout {
+            background-color: #e74c3c;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            padding: 5px 8px;
+            font-size: 0.85em;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        /* Attendance Panel Specific */
+        .attendance-box {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .clock-display {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0 20px 0;
+        }
+
+        .attendance-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-checkin {
+            background-color: #27ae60;
+            font-size: 1.1em;
+            padding: 12px 30px;
+        }
+
+        .btn-checkout {
+            background-color: #e67e22;
+            font-size: 1.1em;
+            padding: 12px 30px;
+        }
+
+        .btn-checkout:hover {
+            background-color: #d35400;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            min-width: 1000px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 8px 6px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.88em;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Filter Controls */
+        .filter-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Summary Box for Report */
+        .print-summary {
+            display: none;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            font-size: 0.95em;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        .status-completed {
+            background-color: #55efc4;
+            color: #00b894;
+        }
+
+        /* Editable inputs inside table */
+        .inline-edit {
+            border: 1px solid transparent;
+            background: transparent;
+            width: 100%;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+
+        .inline-edit:focus, .inline-edit:hover {
+            border: 1px solid #3498db;
+            background: #fff;
+            outline: none;
+        }
+
+        textarea.inline-edit {
+            resize: none;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 28px;
+            line-height: 1.3;
+        }
+
+        /* ==========================================
+           PRINT STYLES
+           ========================================== */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                color: #000;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            #loginScreen, .header-bar, .btn-logout, #jobForm, .filter-container, .btn-delete, h1, th:last-child, td:last-child {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .print-summary {
+                display: block !important;
+                border: 1px solid #ccc;
+            }
+
+            table {
+                width: 100% !important;
+                min-width: 100% !important;
+                border: 1px solid #000;
+                table-layout: auto !important;
+            }
+
+            th {
+                background-color: #eee !important;
+                color: #000 !important;
+                border: 1px solid #000 !important;
+                text-align: center;
+                padding: 6px 4px !important;
+                font-size: 9pt !important;
+            }
+
+            td {
+                border: 1px solid #000 !important;
+                padding: 6px 4px !important;
+                font-size: 9pt !important;
+            }
+
+            .inline-edit, textarea.inline-edit {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                resize: none;
+                font-size: 9pt !important;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 0.8cm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SECTION 0: LOGIN SCREEN -->
+<div id="loginScreen" class="login-wrapper">
+    <div class="login-card">
+        <h2>🔒 เข้าสู่ระบบ</h2>
+        <form id="loginForm">
+            <div class="login-field">
+                <label>ชื่อผู้ใช้งาน (Username)</label>
+                <input type="text" id="username" placeholder="กรอก Username" required autocomplete="username">
+            </div>
+            <div class="login-field">
+                <label>รหัสผ่าน (Password)</label>
+                <input type="password" id="password" placeholder="กรอก Password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
+            <p id="errorMsg" class="error-msg">❌ Username หรือ Password ไม่ถูกต้อง!</p>
+        </form>
+    </div>
+</div>
+
+<!-- SECTION MAIN: APP CONTENT -->
+<div id="mainApp" class="main-app">
+    <div class="container">
+        
+        <!-- HEADER & NAVIGATION BAR -->
+        <div class="header-bar">
+            <div class="nav-menu">
+                <button class="nav-btn active" onclick="switchTab('attendanceTab', this)">📌 หน้าลงชื่อเข้าปฏิบัติงาน</button>
+                <button class="nav-btn" onclick="switchTab('tasksTab', this)">📋 ระบบติดตามภาระงานประจำวัน</button>
+            </div>
+            <button class="btn btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
+        </div>
+
+        <!-- TAB 1: หน้าลงชื่อเข้างาน -->
+        <div id="attendanceTab" class="tab-content active">
+            <div class="card">
+                <h2>📌 ลงชื่อเข้าปฏิบัติงานประจำวัน</h2>
+                <div class="attendance-box">
+                    <p style="color: #666; font-size: 1.1em;">เวลาปัจจุบัน</p>
+                    <div class="clock-display" id="liveClock">00:00:00</div>
+                    <div class="attendance-actions">
+                        <button class="btn btn-checkin" onclick="recordAttendance('เข้างาน')">📥 ลงชื่อเข้างาน (Check-in)</button>
+                        <button class="btn btn-checkout" onclick="recordAttendance('เลิกงาน')">📤 ลงชื่อเลิกงาน (Check-out)</button>
+                    </div>
+                </div>
+
+                <h3>📜 ประวัติการลงชื่อเข้าปฏิบัติงาน</h3>
+                <br>
+                <div class="table-responsive">
+                    <table style="min-width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">วันที่</th>
+                                <th style="width: 20%;">ประเภท</th>
+                                <th style="width: 20%;">เวลาบันทึก</th>
+                                <th style="width: 25%;">ผู้บันทึก</th>
+                                <th style="width: 20%;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- ข้อมูลการลงชื่อจะแสดงตรงนี้ -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ระบบติดตามภาระงาน (หน้ารายงานเดิม) -->
+        <div id="tasksTab" class="tab-content">
+            <!-- SECTION 1: เพิ่มรายการงานใหม่ -->
+            <div class="card">
+                <h2>➕ บันทึกงานใหม่ / มอบหมายงาน</h2>
+                <form id="jobForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>วันที่ได้รับงาน</label>
+                            <input type="date" id="receivedDate" required>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>ชื่องาน / รายละเอียด</label>
+                            <textarea id="jobTitle" rows="2" placeholder="เช่น ตรวจเช็กระบบไฟฟ้า / งานเอกสาร" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>เจ้าของงาน (ชื่อผู้มอบหมาย)</label>
+                            <input type="text" id="jobOwner" placeholder="ระบุชื่อเจ้าของงาน" required>
+                        </div>
+                        <div class="form-group">
+                            <label>ตำแหน่งเจ้าของงาน</label>
+                            <select id="jobOwnerPosition" required>
+                                <option value="หัวหน้าแผนก บร.2">หัวหน้าแผนก บร.2</option>
+                                <option value="ผู้ช่วยหัวหน้าแผนก บร.2">ผู้ช่วยหัวหน้าแผนก บร.2</option>
+                                <option value="ช่างเทคนิคไฟฟ้า 6">ช่างเทคนิคไฟฟ้า 6</option>
+                                <option value="ช่างไฟฟ้า">ช่างไฟฟ้า</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ผู้รับผิดชอบงาน (ชื่อคนทำ)</label>
+                            <input type="text" id="assignee" placeholder="ระบุชื่อผู้ปฏิบัติงาน" required>
+                        </div>
+                        <div class="form-group">
+                            <label>ตำแหน่งคนทำ</label>
+                            <select id="assigneePosition" required>
+                                <option value="ช่างไฟฟ้า">ช่างไฟฟ้า</option>
+                                <option value="ช่างเทคนิคไฟฟ้า 6">ช่างเทคนิคไฟฟ้า 6</option>
+                                <option value="ผู้ช่วยหัวหน้าแผนก บร.2">ผู้ช่วยหัวหน้าแผนก บร.2</option>
+                                <option value="หัวหน้าแผนก บร.2">หัวหน้าแผนก บร.2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>สถานะงาน</label>
+                            <select id="status" onchange="toggleCompletedDateInput()">
+                                <option value="ยังไม่เสร็จ">⏳ ยังไม่เสร็จ</option>
+                                <option value="เสร็จแล้ว">✅ เสร็จแล้ว</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>วันที่งานเสร็จ (ถ้ามี)</label>
+                            <input type="date" id="completedDate" disabled>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">บันทึกข้อมูลงาน</button>
+                </form>
+            </div>
+
+            <!-- SECTION 2: รายการงานทั้งหมด และตัวกรอง -->
+            <div class="card">
+                <h2 id="reportHeader">📁 รายงานสรุปการปฏิบัติงาน</h2>
+                
+                <div class="filter-container">
+                    <label><strong>เลือกดูข้อมูลเดือน/ปี:</strong></label>
+                    <input type="month" id="monthFilter" onchange="renderJobs()">
+                    <button type="button" class="btn" style="background-color: #7f8c8d;" onclick="resetFilter()">แสดงทั้งหมด</button>
+                    <button type="button" class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงานประจำเดือน</button>
+                </div>
+
+                <div class="print-summary" id="printSummary">
+                    <!-- สรุปสถิติจะถูกใส่ที่นี่ด้วย JS -->
+                </div>
+
+                <div class="table-responsive">
+                    <table style="min-width: 1280px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 105px;">วันที่ได้รับงาน</th>
+                                <th style="width: 22%;">รายละเอียดงาน</th>
+                                <th style="width: 12%;">เจ้าของงาน</th>
+                                <th style="width: 160px;">ตำแหน่งเจ้าของงาน</th>
+                                <th style="width: 12%;">ผู้รับผิดชอบ (คนทำ)</th>
+                                <th style="width: 160px;">ตำแหน่งคนทำ</th>
+                                <th style="width: 110px;">สถานะ</th>
+                                <th style="width: 105px;">วันที่เสร็จ</th>
+                                <th style="width: 50px;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobTableBody">
+                            <!-- รายการงานจะมาแสดงที่นี่ -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // CREDENTIALS
+    const AUTH_USER = "sittiphol.mea";
+    const AUTH_PASS = "0806694271";
+
+    const positions = [
+        "หัวหน้าแผนก บร.2",
+        "ผู้ช่วยหัวหน้าแผนก บร.2",
+        "ช่างเทคนิคไฟฟ้า 6",
+        "ช่างไฟฟ้า"
+    ];
+
+    let jobs = JSON.parse(localStorage.getItem('myWorkLogs')) || [];
+    let attendanceLogs = JSON.parse(localStorage.getItem('myAttendanceLogs')) || [];
+
+    // Real-time Clock
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('liveClock').innerText = now.toLocaleTimeString('th-TH');
+    }, 1000);
+
+    // Check Login Session on Load
+    window.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            showMainApp();
+        }
+    });
+
+    // Handle Login Submit
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const userInput = document.getElementById('username').value.trim();
+        const passInput = document.getElementById('password').value.trim();
+        const errorMsg = document.getElementById('errorMsg');
+
+        if (userInput === AUTH_USER && passInput === AUTH_PASS) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            errorMsg.style.display = 'none';
+            showMainApp();
+        } else {
+            errorMsg.style.display = 'block';
+        }
+    });
+
+    function showMainApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        initApp();
+    }
+
+    function logout() {
+        sessionStorage.removeItem('isLoggedIn');
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('loginForm').reset();
+    }
+
+    // TAB SWITCHING FUNCTION
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    function initApp() {
+        const now = new Date();
+        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        document.getElementById('monthFilter').value = currentMonthStr;
+        document.getElementById('receivedDate').valueAsDate = now;
+        renderJobs();
+        renderAttendance();
+    }
+
+    /* ==========================================
+       ATTENDANCE FUNCTIONS
+       ========================================== */
+    function recordAttendance(type) {
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toLocaleTimeString('th-TH');
+
+        const newRecord = {
+            id: Date.now(),
+            date: dateStr,
+            type: type,
+            time: timeStr,
+            user: AUTH_USER
+        };
+
+        attendanceLogs.unshift(newRecord);
+        localStorage.setItem('myAttendanceLogs', JSON.stringify(attendanceLogs));
+        renderAttendance();
+        alert(`บันทึกเวลา "${type}" เรียบร้อยแล้ว เวลา ${timeStr}`);
+    }
+
+    function deleteAttendance(id) {
+        if (confirm('คุณต้องการลบรายการลงชื่อนี้ใช่หรือไม่?')) {
+            attendanceLogs = attendanceLogs.filter(a => a.id !== id);
+            localStorage.setItem('myAttendanceLogs', JSON.stringify(attendanceLogs));
+            renderAttendance();
+        }
+    }
+
+    function renderAttendance() {
+        const tbody = document.getElementById('attendanceTableBody');
+        tbody.innerHTML = '';
+
+        if (attendanceLogs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888;">ยังไม่มีประวัติการลงชื่อ</td></tr>`;
+            return;
+        }
+
+        attendanceLogs.forEach(log => {
+            const tr = document.createElement('tr');
+            const typeColor = log.type === 'เข้างาน' ? 'color: #27ae60; font-weight: bold;' : 'color: #e67e22; font-weight: bold;';
+            tr.innerHTML = `
+                <td style="text-align: center;">${log.date}</td>
+                <td style="text-align: center; ${typeColor}">${log.type === 'เข้างาน' ? '📥 เข้างาน' : '📤 เลิกงาน'}</td>
+                <td style="text-align: center;">${log.time} น.</td>
+                <td style="text-align: center;">${log.user}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-delete" onclick="deleteAttendance(${log.id})">ลบ</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* ==========================================
+       TASKS MANAGEMENT FUNCTIONS
+       ========================================== */
+    function toggleCompletedDateInput() {
+        const status = document.getElementById('status').value;
+        const completedDateInput = document.getElementById('completedDate');
+        if (status === 'เสร็จแล้ว') {
+            completedDateInput.disabled = false;
+            completedDateInput.valueAsDate = new Date();
+        } else {
+            completedDateInput.disabled = true;
+            completedDateInput.value = '';
+        }
+    }
+
+    document.getElementById('jobForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const newJob = {
+            id: Date.now(),
+            receivedDate: document.getElementById('receivedDate').value,
+            jobTitle: document.getElementById('jobTitle').value,
+            jobOwner: document.getElementById('jobOwner').value,
+            jobOwnerPosition: document.getElementById('jobOwnerPosition').value,
+            assignee: document.getElementById('assignee').value,
+            assigneePosition: document.getElementById('assigneePosition').value,
+            status: document.getElementById('status').value,
+            completedDate: document.getElementById('completedDate').value || '-'
+        };
+
+        jobs.push(newJob);
+        saveAndRenderJobs();
+        this.reset();
+        document.getElementById('receivedDate').valueAsDate = new Date();
+        document.getElementById('completedDate').disabled = true;
+    });
+
+    function saveAndRenderJobs() {
+        localStorage.setItem('myWorkLogs', JSON.stringify(jobs));
+        renderJobs();
+    }
+
+    function updateJob(id, field, value) {
+        const index = jobs.findIndex(j => j.id === id);
+        if (index !== -1) {
+            jobs[index][field] = value;
+            
+            if (field === 'status') {
+                if (value === 'เสร็จแล้ว' && (jobs[index].completedDate === '-' || !jobs[index].completedDate)) {
+                    jobs[index].completedDate = new Date().toISOString().split('T')[0];
+                } else if (value === 'ยังไม่เสร็จ') {
+                    jobs[index].completedDate = '-';
+                }
+            }
+            saveAndRenderJobs();
+        }
+    }
+
+    function deleteJob(id) {
+        if (confirm('คุณต้องการลบรายการงานนี้ใช่หรือไม่?')) {
+            jobs = jobs.filter(j => j.id !== id);
+            saveAndRenderJobs();
+        }
+    }
+
+    function resetFilter() {
+        document.getElementById('monthFilter').value = '';
+        renderJobs();
+    }
+
+    function generatePositionOptions(selectedPosition) {
+        return positions.map(pos => 
+            `<option value="${pos}" ${pos === selectedPosition ? 'selected' : ''}>${pos}</option>`
+        ).join('');
+    }
+
+    function getThaiMonthYear(monthStr) {
+        if (!monthStr) return "ทั้งหมด";
+        const [year, month] = monthStr.split('-');
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
+        return `${thaiMonths[parseInt(month) - 1]} พ.ศ. ${parseInt(year) + 543}`;
+    }
+
+    function autoResizeTextarea(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+
+    function renderJobs() {
+        const tbody = document.getElementById('jobTableBody');
+        tbody.innerHTML = '';
+
+        const monthFilter = document.getElementById('monthFilter').value;
+
+        const filteredJobs = jobs.filter(job => {
+            if (!monthFilter) return true;
+            return job.receivedDate.startsWith(monthFilter);
+        });
+
+        const monthText = getThaiMonthYear(monthFilter);
+        document.getElementById('reportHeader').innerText = `📁 รายงานสรุปการปฏิบัติงาน ประจำเดือน: ${monthText}`;
+        
+        const completedCount = filteredJobs.filter(j => j.status === 'เสร็จแล้ว').length;
+        const pendingCount = filteredJobs.length - completedCount;
+
+        document.getElementById('printSummary').innerHTML = `
+            <strong>สรุปภาพรวมประจำเดือน (${monthText}):</strong> 
+            งานทั้งหมด ${filteredJobs.length} รายการ | 
+            ✅ เสร็จแล้ว ${completedCount} รายการ | 
+            ⏳ ยังไม่เสร็จ ${pendingCount} รายการ
+        `;
+
+        if (filteredJobs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>`;
+            return;
+        }
+
+        filteredJobs.sort((a, b) => new Date(a.receivedDate) - new Date(b.receivedDate));
+
+        filteredJobs.forEach(job => {
+            const tr = document.createElement('tr');
+            
+            const isCompleted = job.status === 'เสร็จแล้ว';
+            const statusClass = isCompleted ? 'status-completed' : 'status-pending';
+
+            tr.innerHTML = `
+                <td>
+                    <input type="date" class="inline-edit" value="${job.receivedDate}" onchange="updateJob(${job.id}, 'receivedDate', this.value)">
+                </td>
+                <td>
+                    <textarea class="inline-edit" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobTitle', this.value)">${job.jobTitle}</textarea>
+                </td>
+                <td>
+                    <input type="text" class="inline-edit" value="${job.jobOwner}" onchange="updateJob(${job.id}, 'jobOwner', this.value)">
+                </td>
+                <td>
+                    <select class="inline-edit" onchange="updateJob(${job.id}, 'jobOwnerPosition', this.value)">
+                        ${generatePositionOptions(job.jobOwnerPosition || 'หัวหน้าแผนก บร.2')}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="inline-edit" value="${job.assignee}" onchange="updateJob(${job.id}, 'assignee', this.value)">
+                </td>
+                <td>
+                    <select class="inline-edit" onchange="updateJob(${job.id}, 'assigneePosition', this.value)">
+                        ${generatePositionOptions(job.assigneePosition || 'ช่างไฟฟ้า')}
+                    </select>
+                </td>
+                <td>
+                    <select class="inline-edit ${statusClass}" onchange="updateJob(${job.id}, 'status', this.value)">
+                        <option value="ยังไม่เสร็จ" ${job.status === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
+                        <option value="เสร็จแล้ว" ${job.status === 'เสร็จแล้ว' ? 'selected' : ''}>✅ เสร็จแล้ว</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="date" class="inline-edit" value="${job.completedDate !== '-' ? job.completedDate : ''}" onchange="updateJob(${job.id}, 'completedDate', this.value || '-')">
+                </td>
+                <td style="text-align: center;">
+                    <button class="btn btn-delete" onclick="deleteJob(${job.id})">ลบ</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        setTimeout(() => {
+            document.querySelectorAll('textarea.inline-edit').forEach(ta => autoResizeTextarea(ta));
+        }, 10);
+    }
+</script>
+
+</body>
+</html>
