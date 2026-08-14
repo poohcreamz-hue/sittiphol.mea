@@ -97,7 +97,7 @@
         }
 
         .container {
-            max-width: 1500px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -142,7 +142,7 @@
         }
 
         .tab-content {
-            display: none; /* ซ่อนแต่ละหน้าไว้แล้วสลับด้วย JS */
+            display: none;
         }
 
         .tab-content.active {
@@ -164,7 +164,7 @@
         /* Form Styling */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
@@ -285,15 +285,15 @@
             width: 100%;
             border-collapse: collapse;
             background: #fff;
-            min-width: 1000px;
+            min-width: 1400px;
             table-layout: fixed;
         }
 
         th, td {
-            padding: 8px 6px;
+            padding: 8px 5px;
             text-align: left;
             border-bottom: 1px solid #ddd;
-            font-size: 0.88em;
+            font-size: 0.85em;
             vertical-align: top;
             word-wrap: break-word;
         }
@@ -342,6 +342,16 @@
             color: #d35400;
         }
 
+        .status-review {
+            background-color: #e17055;
+            color: #ffffff;
+        }
+
+        .status-signed {
+            background-color: #74b9ff;
+            color: #0984e3;
+        }
+
         .status-completed {
             background-color: #55efc4;
             color: #00b894;
@@ -352,9 +362,9 @@
             border: 1px solid transparent;
             background: transparent;
             width: 100%;
-            padding: 2px 4px;
+            padding: 2px 2px;
             border-radius: 3px;
-            font-size: 0.95em;
+            font-size: 0.9em;
         }
 
         .inline-edit:focus, .inline-edit:hover {
@@ -413,14 +423,14 @@
                 color: #000 !important;
                 border: 1px solid #000 !important;
                 text-align: center;
-                padding: 6px 4px !important;
-                font-size: 9pt !important;
+                padding: 5px 3px !important;
+                font-size: 8.5pt !important;
             }
 
             td {
                 border: 1px solid #000 !important;
-                padding: 6px 4px !important;
-                font-size: 9pt !important;
+                padding: 5px 3px !important;
+                font-size: 8.5pt !important;
             }
 
             .inline-edit, textarea.inline-edit {
@@ -428,12 +438,12 @@
                 background: transparent !important;
                 padding: 0 !important;
                 resize: none;
-                font-size: 9pt !important;
+                font-size: 8.5pt !important;
             }
 
             @page {
                 size: A4 landscape;
-                margin: 0.8cm;
+                margin: 0.6cm;
             }
         }
     </style>
@@ -506,7 +516,7 @@
             </div>
         </div>
 
-        <!-- TAB 2: ระบบติดตามภาระงาน (หน้ารายงานเดิม) -->
+        <!-- TAB 2: ระบบติดตามภาระงาน -->
         <div id="tasksTab" class="tab-content">
             <!-- SECTION 1: เพิ่มรายการงานใหม่ -->
             <div class="card">
@@ -549,14 +559,24 @@
                         </div>
                         <div class="form-group">
                             <label>สถานะงาน</label>
-                            <select id="status" onchange="toggleCompletedDateInput()">
+                            <select id="status" onchange="toggleDateInputs()">
                                 <option value="ยังไม่เสร็จ">⏳ ยังไม่เสร็จ</option>
-                                <option value="เสร็จแล้ว">✅ เสร็จแล้ว</option>
+                                <option value="รอตรวจ">🔍 รอตรวจ</option>
+                                <option value="เซ็นรับรองแล้ว">📑 เซ็นรับรองแล้ว</option>
+                                <option value="งานเสร็จแล้ว">✅ งานเสร็จแล้ว</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>วันที่งานเสร็จ (ถ้ามี)</label>
-                            <input type="date" id="completedDate" disabled>
+                            <label>วันที่ส่งตรวจ</label>
+                            <input type="date" id="reviewDate">
+                        </div>
+                        <div class="form-group">
+                            <label>วันที่เซ็นรับรอง</label>
+                            <input type="date" id="signedDate">
+                        </div>
+                        <div class="form-group">
+                            <label>วันที่งานเสร็จ</label>
+                            <input type="date" id="completedDate">
                         </div>
                     </div>
                     <button type="submit" class="btn">บันทึกข้อมูลงาน</button>
@@ -579,18 +599,20 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table style="min-width: 1280px;">
+                    <table style="min-width: 1450px;">
                         <thead>
                             <tr>
-                                <th style="width: 105px;">วันที่ได้รับงาน</th>
-                                <th style="width: 22%;">รายละเอียดงาน</th>
-                                <th style="width: 12%;">เจ้าของงาน</th>
-                                <th style="width: 160px;">ตำแหน่งเจ้าของงาน</th>
-                                <th style="width: 12%;">ผู้รับผิดชอบ (คนทำ)</th>
-                                <th style="width: 160px;">ตำแหน่งคนทำ</th>
-                                <th style="width: 110px;">สถานะ</th>
-                                <th style="width: 105px;">วันที่เสร็จ</th>
-                                <th style="width: 50px;">จัดการ</th>
+                                <th style="width: 100px;">วันที่ได้รับงาน</th>
+                                <th style="width: 20%;">รายละเอียดงาน</th>
+                                <th style="width: 10%;">เจ้าของงาน</th>
+                                <th style="width: 140px;">ตำแหน่งเจ้าของงาน</th>
+                                <th style="width: 10%;">ผู้รับผิดชอบ</th>
+                                <th style="width: 140px;">ตำแหน่งคนทำ</th>
+                                <th style="width: 125px;">สถานะ</th>
+                                <th style="width: 100px;">วันที่ส่งตรวจ</th>
+                                <th style="width: 100px;">วันที่เซ็นรับรอง</th>
+                                <th style="width: 100px;">วันที่เสร็จ</th>
+                                <th style="width: 45px;">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="jobTableBody">
@@ -737,15 +759,19 @@
     /* ==========================================
        TASKS MANAGEMENT FUNCTIONS
        ========================================== */
-    function toggleCompletedDateInput() {
+    function toggleDateInputs() {
         const status = document.getElementById('status').value;
-        const completedDateInput = document.getElementById('completedDate');
-        if (status === 'เสร็จแล้ว') {
-            completedDateInput.disabled = false;
-            completedDateInput.valueAsDate = new Date();
-        } else {
-            completedDateInput.disabled = true;
-            completedDateInput.value = '';
+        const reviewInput = document.getElementById('reviewDate');
+        const signedInput = document.getElementById('signedDate');
+        const completedInput = document.getElementById('completedDate');
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        if (status === 'รอตรวจ' && !reviewInput.value) {
+            reviewInput.value = todayStr;
+        } else if (status === 'เซ็นรับรองแล้ว' && !signedInput.value) {
+            signedInput.value = todayStr;
+        } else if ((status === 'งานเสร็จแล้ว' || status === 'เสร็จแล้ว') && !completedInput.value) {
+            completedInput.value = todayStr;
         }
     }
 
@@ -761,6 +787,8 @@
             assignee: document.getElementById('assignee').value,
             assigneePosition: document.getElementById('assigneePosition').value,
             status: document.getElementById('status').value,
+            reviewDate: document.getElementById('reviewDate').value || '-',
+            signedDate: document.getElementById('signedDate').value || '-',
             completedDate: document.getElementById('completedDate').value || '-'
         };
 
@@ -768,7 +796,6 @@
         saveAndRenderJobs();
         this.reset();
         document.getElementById('receivedDate').valueAsDate = new Date();
-        document.getElementById('completedDate').disabled = true;
     });
 
     function saveAndRenderJobs() {
@@ -781,11 +808,15 @@
         if (index !== -1) {
             jobs[index][field] = value;
             
+            // ใส่วันที่อัตโนมัติตามสถานะที่เลือก
             if (field === 'status') {
-                if (value === 'เสร็จแล้ว' && (jobs[index].completedDate === '-' || !jobs[index].completedDate)) {
-                    jobs[index].completedDate = new Date().toISOString().split('T')[0];
-                } else if (value === 'ยังไม่เสร็จ') {
-                    jobs[index].completedDate = '-';
+                const today = new Date().toISOString().split('T')[0];
+                if (value === 'รอตรวจ') {
+                    if (!jobs[index].reviewDate || jobs[index].reviewDate === '-') jobs[index].reviewDate = today;
+                } else if (value === 'เซ็นรับรองแล้ว') {
+                    if (!jobs[index].signedDate || jobs[index].signedDate === '-') jobs[index].signedDate = today;
+                } else if (value === 'งานเสร็จแล้ว' || value === 'เสร็จแล้ว') {
+                    if (!jobs[index].completedDate || jobs[index].completedDate === '-') jobs[index].completedDate = today;
                 }
             }
             saveAndRenderJobs();
@@ -825,6 +856,16 @@
         element.style.height = (element.scrollHeight) + 'px';
     }
 
+    function getStatusClass(status) {
+        switch(status) {
+            case 'รอตรวจ': return 'status-review';
+            case 'เซ็นรับรองแล้ว': return 'status-signed';
+            case 'งานเสร็จแล้ว': 
+            case 'เสร็จแล้ว': return 'status-completed';
+            default: return 'status-pending';
+        }
+    }
+
     function renderJobs() {
         const tbody = document.getElementById('jobTableBody');
         tbody.innerHTML = '';
@@ -839,18 +880,22 @@
         const monthText = getThaiMonthYear(monthFilter);
         document.getElementById('reportHeader').innerText = `📁 รายงานสรุปการปฏิบัติงาน ประจำเดือน: ${monthText}`;
         
-        const completedCount = filteredJobs.filter(j => j.status === 'เสร็จแล้ว').length;
-        const pendingCount = filteredJobs.length - completedCount;
+        const completedCount = filteredJobs.filter(j => j.status === 'งานเสร็จแล้ว' || j.status === 'เสร็จแล้ว').length;
+        const signedCount = filteredJobs.filter(j => j.status === 'เซ็นรับรองแล้ว').length;
+        const reviewCount = filteredJobs.filter(j => j.status === 'รอตรวจ').length;
+        const pendingCount = filteredJobs.filter(j => j.status === 'ยังไม่เสร็จ' || !j.status).length;
 
         document.getElementById('printSummary').innerHTML = `
             <strong>สรุปภาพรวมประจำเดือน (${monthText}):</strong> 
             งานทั้งหมด ${filteredJobs.length} รายการ | 
-            ✅ เสร็จแล้ว ${completedCount} รายการ | 
-            ⏳ ยังไม่เสร็จ ${pendingCount} รายการ
+            ✅ งานเสร็จแล้ว ${completedCount} | 
+            📑 เซ็นรับรองแล้ว ${signedCount} | 
+            🔍 รอตรวจ ${reviewCount} | 
+            ⏳ ยังไม่เสร็จ ${pendingCount}
         `;
 
         if (filteredJobs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>`;
             return;
         }
 
@@ -858,9 +903,11 @@
 
         filteredJobs.forEach(job => {
             const tr = document.createElement('tr');
-            
-            const isCompleted = job.status === 'เสร็จแล้ว';
-            const statusClass = isCompleted ? 'status-completed' : 'status-pending';
+            const statusClass = getStatusClass(job.status);
+
+            const reviewVal = (job.reviewDate && job.reviewDate !== '-') ? job.reviewDate : '';
+            const signedVal = (job.signedDate && job.signedDate !== '-') ? job.signedDate : '';
+            const completedVal = (job.completedDate && job.completedDate !== '-') ? job.completedDate : '';
 
             tr.innerHTML = `
                 <td>
@@ -888,11 +935,19 @@
                 <td>
                     <select class="inline-edit ${statusClass}" onchange="updateJob(${job.id}, 'status', this.value)">
                         <option value="ยังไม่เสร็จ" ${job.status === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
-                        <option value="เสร็จแล้ว" ${job.status === 'เสร็จแล้ว' ? 'selected' : ''}>✅ เสร็จแล้ว</option>
+                        <option value="รอตรวจ" ${job.status === 'รอตรวจ' ? 'selected' : ''}>🔍 รอตรวจ</option>
+                        <option value="เซ็นรับรองแล้ว" ${job.status === 'เซ็นรับรองแล้ว' ? 'selected' : ''}>📑 เซ็นรับรองแล้ว</option>
+                        <option value="งานเสร็จแล้ว" ${(job.status === 'งานเสร็จแล้ว' || job.status === 'เสร็จแล้ว') ? 'selected' : ''}>✅ งานเสร็จแล้ว</option>
                     </select>
                 </td>
                 <td>
-                    <input type="date" class="inline-edit" value="${job.completedDate !== '-' ? job.completedDate : ''}" onchange="updateJob(${job.id}, 'completedDate', this.value || '-')">
+                    <input type="date" class="inline-edit" value="${reviewVal}" onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
+                </td>
+                <td>
+                    <input type="date" class="inline-edit" value="${signedVal}" onchange="updateJob(${job.id}, 'signedDate', this.value || '-')">
+                </td>
+                <td>
+                    <input type="date" class="inline-edit" value="${completedVal}" onchange="updateJob(${job.id}, 'completedDate', this.value || '-')">
                 </td>
                 <td style="text-align: center;">
                     <button class="btn btn-delete" onclick="deleteJob(${job.id})">ลบ</button>
