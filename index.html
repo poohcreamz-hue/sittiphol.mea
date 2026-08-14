@@ -289,7 +289,7 @@
             width: 100%;
             border-collapse: collapse;
             background: #fff;
-            table-layout: fixed; /* ควบคุมความกว้างช่องให้เป๊ะขึ้น */
+            table-layout: fixed;
         }
 
         th, td {
@@ -412,7 +412,7 @@
                 border: 1px solid #000 !important;
                 margin-bottom: 10px !important;
                 padding: 8px 12px !important;
-                font-size: 9pt !important;
+                font-size: 8pt !important;
             }
 
             .table-responsive {
@@ -428,12 +428,12 @@
 
             th, td {
                 border: 1px solid #000 !important;
-                padding: 4px 3px !important;
-                font-size: 8pt !important;
+                padding: 3px 2px !important;
+                font-size: 7.5pt !important; /* ปรับขนาดตัวอักษรลงเล็กน้อย เพื่อไม่ให้ข้อความขี่หรือล้นช่อง */
                 word-break: break-word !important;
                 overflow-wrap: break-word !important;
                 white-space: normal !important;
-                vertical-align: top !important;
+                vertical-align: middle !important;
             }
 
             th {
@@ -449,7 +449,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 resize: none !important;
-                font-size: 8pt !important;
+                font-size: 7.5pt !important;
                 width: 100% !important;
                 height: auto !important;
                 min-height: auto !important;
@@ -468,7 +468,7 @@
 
             @page {
                 size: A4 landscape;
-                margin: 0.6cm;
+                margin: 0.5cm;
             }
         }
     </style>
@@ -624,19 +624,19 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table style="min-width: 1300px;">
+                    <table style="min-width: 1350px;">
                         <thead>
                             <tr>
-                                <th style="width: 115px;">วันที่รับงาน</th>
-                                <th style="width: 25%;">รายละเอียดงาน</th>
-                                <th style="width: 110px;">เจ้าของงาน</th>
-                                <th style="width: 135px;">ตำแหน่งเจ้าของงาน</th>
-                                <th style="width: 110px;">ผู้รับผิดชอบ</th>
+                                <th style="width: 110px;">วันที่รับงาน</th>
+                                <th style="width: 22%;">รายละเอียดงาน</th>
+                                <th style="width: 135px;">เจ้าของงาน</th>
+                                <th style="width: 130px;">ตำแหน่งเจ้าของงาน</th>
+                                <th style="width: 135px;">ผู้รับผิดชอบ</th>
                                 <th style="width: 125px;">ตำแหน่งคนทำ</th>
-                                <th style="width: 115px;">สถานะ</th>
-                                <th style="width: 115px;">วันที่ส่งตรวจ</th>
-                                <th style="width: 115px;">วันที่เซ็นรับรอง</th>
-                                <th style="width: 115px;">วันที่เสร็จ</th>
+                                <th style="width: 105px;">สถานะ</th>
+                                <th style="width: 110px;">วันที่ส่งตรวจ</th>
+                                <th style="width: 110px;">วันที่เซ็นรับรอง</th>
+                                <th style="width: 110px;">วันที่เสร็จ</th>
                                 <th style="width: 45px;">จัดการ</th>
                             </tr>
                         </thead>
