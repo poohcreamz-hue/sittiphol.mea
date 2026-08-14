@@ -97,7 +97,7 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1650px;
             margin: 0 auto;
         }
 
@@ -296,6 +296,7 @@
             font-size: 0.85em;
             vertical-align: top;
             word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         th {
@@ -383,17 +384,19 @@
         }
 
         /* ==========================================
-           PRINT STYLES
+           PRINT & PDF STYLES (ปรับปรุงเพื่อไม่ให้ข้อความขาด)
            ========================================== */
         @media print {
             body {
-                background-color: #fff;
-                padding: 0;
-                color: #000;
+                background-color: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                color: #000 !important;
             }
 
             .container {
-                max-width: 100%;
+                max-width: 100% !important;
+                width: 100% !important;
             }
 
             #loginScreen, .header-bar, .btn-logout, #jobForm, .filter-container, .btn-delete, h1, th:last-child, td:last-child {
@@ -401,44 +404,71 @@
             }
 
             .card {
-                box-shadow: none;
-                padding: 0;
-                margin: 0;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
             }
 
             .print-summary {
                 display: block !important;
-                border: 1px solid #ccc;
+                border: 1px solid #000 !important;
+                margin-bottom: 10px !important;
+                padding: 8px 12px !important;
+                font-size: 9pt !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
             }
 
             table {
                 width: 100% !important;
                 min-width: 100% !important;
-                border: 1px solid #000;
-                table-layout: auto !important;
+                border: 1px solid #000 !important;
+                table-layout: auto !important; /* ปรับขนาดคอลัมน์ให้อัตโนมัติตามเนื้อหา */
+            }
+
+            th, td {
+                border: 1px solid #000 !important;
+                padding: 4px 3px !important;
+                font-size: 8pt !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                white-space: normal !important;
+                vertical-align: top !important;
             }
 
             th {
                 background-color: #eee !important;
                 color: #000 !important;
-                border: 1px solid #000 !important;
-                text-align: center;
-                padding: 5px 3px !important;
-                font-size: 8.5pt !important;
+                text-align: center !important;
+                font-weight: bold !important;
             }
 
-            td {
-                border: 1px solid #000 !important;
-                padding: 5px 3px !important;
-                font-size: 8.5pt !important;
-            }
-
-            .inline-edit, textarea.inline-edit {
+            /* ขยาย input / textarea ให้แสดงผลข้อความได้เต็ม ไม่โดนตัดขอบ */
+            .inline-edit, textarea.inline-edit, select.inline-edit {
                 border: none !important;
                 background: transparent !important;
                 padding: 0 !important;
-                resize: none;
-                font-size: 8.5pt !important;
+                margin: 0 !important;
+                resize: none !important;
+                font-size: 8pt !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                overflow: visible !important;
+                white-space: pre-wrap !important;
+                word-break: break-word !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
+                color: #000 !important;
+            }
+
+            /* ซ่อนไอคอนเลือกลูกศรของ select เวลาพิมพ์ */
+            select.inline-edit::-ms-expand {
+                display: none;
             }
 
             @page {
@@ -591,7 +621,7 @@
                     <label><strong>เลือกดูข้อมูลเดือน/ปี:</strong></label>
                     <input type="month" id="monthFilter" onchange="renderJobs()">
                     <button type="button" class="btn" style="background-color: #7f8c8d;" onclick="resetFilter()">แสดงทั้งหมด</button>
-                    <button type="button" class="btn btn-print" onclick="window.print()">🖨️ พิมพ์รายงานประจำเดือน</button>
+                    <button type="button" class="btn btn-print" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF รายงานประจำเดือน</button>
                 </div>
 
                 <div class="print-summary" id="printSummary">
@@ -599,19 +629,19 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table style="min-width: 1450px;">
+                    <table style="min-width: 1400px;">
                         <thead>
                             <tr>
-                                <th style="width: 100px;">วันที่ได้รับงาน</th>
-                                <th style="width: 20%;">รายละเอียดงาน</th>
-                                <th style="width: 10%;">เจ้าของงาน</th>
-                                <th style="width: 140px;">ตำแหน่งเจ้าของงาน</th>
-                                <th style="width: 10%;">ผู้รับผิดชอบ</th>
-                                <th style="width: 140px;">ตำแหน่งคนทำ</th>
-                                <th style="width: 125px;">สถานะ</th>
-                                <th style="width: 100px;">วันที่ส่งตรวจ</th>
-                                <th style="width: 100px;">วันที่เซ็นรับรอง</th>
-                                <th style="width: 100px;">วันที่เสร็จ</th>
+                                <th style="width: 85px;">วันที่รับงาน</th>
+                                <th style="width: auto;">รายละเอียดงาน</th>
+                                <th style="width: 100px;">เจ้าของงาน</th>
+                                <th style="width: 130px;">ตำแหน่งเจ้าของงาน</th>
+                                <th style="width: 100px;">ผู้รับผิดชอบ</th>
+                                <th style="width: 130px;">ตำแหน่งคนทำ</th>
+                                <th style="width: 110px;">สถานะ</th>
+                                <th style="width: 85px;">วันที่ส่งตรวจ</th>
+                                <th style="width: 85px;">วันที่เซ็นรับรอง</th>
+                                <th style="width: 85px;">วันที่เสร็จ</th>
                                 <th style="width: 45px;">จัดการ</th>
                             </tr>
                         </thead>
@@ -808,7 +838,6 @@
         if (index !== -1) {
             jobs[index][field] = value;
             
-            // ใส่วันที่อัตโนมัติตามสถานะที่เลือก
             if (field === 'status') {
                 const today = new Date().toISOString().split('T')[0];
                 if (value === 'รอตรวจ') {
