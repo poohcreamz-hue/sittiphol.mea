@@ -97,7 +97,7 @@
         }
 
         .container {
-            max-width: 1650px;
+            max-width: 1700px;
             margin: 0 auto;
         }
 
@@ -293,10 +293,10 @@
         }
 
         th, td {
-            padding: 6px 4px;
+            padding: 4px 2px;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
-            font-size: 0.88em;
+            font-size: 0.85em;
             vertical-align: middle;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -307,8 +307,8 @@
             color: white;
             white-space: nowrap;
             text-align: center;
-            font-size: 0.9em;
-            padding: 8px 4px;
+            font-size: 0.88em;
+            padding: 8px 2px;
         }
 
         tr:hover {
@@ -353,9 +353,9 @@
             border: 1px solid transparent;
             background: transparent;
             width: 100%;
-            padding: 3px 4px;
+            padding: 2px 2px;
             border-radius: 4px;
-            font-size: 0.95em;
+            font-size: 0.92em;
             color: #2c3e50;
         }
 
@@ -366,8 +366,8 @@
         }
 
         input[type="date"].inline-edit {
-            font-size: 0.85em;
-            padding: 2px;
+            font-size: 0.82em;
+            padding: 2px 0;
         }
 
         textarea.inline-edit {
@@ -376,7 +376,7 @@
             white-space: pre-wrap;
             word-break: break-word;
             min-height: 24px;
-            line-height: 1.3;
+            line-height: 1.25;
             display: block;
         }
 
@@ -410,8 +410,8 @@
             .print-summary {
                 display: block !important;
                 border: 1px solid #000 !important;
-                margin-bottom: 10px !important;
-                padding: 8px 12px !important;
+                margin-bottom: 8px !important;
+                padding: 6px 10px !important;
                 font-size: 8pt !important;
             }
 
@@ -423,13 +423,13 @@
                 width: 100% !important;
                 min-width: 100% !important;
                 border: 1px solid #000 !important;
-                table-layout: auto !important;
+                table-layout: fixed !important;
             }
 
             th, td {
                 border: 1px solid #000 !important;
-                padding: 3px 2px !important;
-                font-size: 7.5pt !important; /* ปรับขนาดตัวอักษรลงเล็กน้อย เพื่อไม่ให้ข้อความขี่หรือล้นช่อง */
+                padding: 2px 1px !important;
+                font-size: 7pt !important;
                 word-break: break-word !important;
                 overflow-wrap: break-word !important;
                 white-space: normal !important;
@@ -449,7 +449,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 resize: none !important;
-                font-size: 7.5pt !important;
+                font-size: 7pt !important;
                 width: 100% !important;
                 height: auto !important;
                 min-height: auto !important;
@@ -468,7 +468,7 @@
 
             @page {
                 size: A4 landscape;
-                margin: 0.5cm;
+                margin: 0.4cm;
             }
         }
     </style>
@@ -624,19 +624,19 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table style="min-width: 1350px;">
+                    <table style="min-width: 1450px;">
                         <thead>
                             <tr>
-                                <th style="width: 110px;">วันที่รับงาน</th>
-                                <th style="width: 22%;">รายละเอียดงาน</th>
-                                <th style="width: 135px;">เจ้าของงาน</th>
-                                <th style="width: 130px;">ตำแหน่งเจ้าของงาน</th>
-                                <th style="width: 135px;">ผู้รับผิดชอบ</th>
-                                <th style="width: 125px;">ตำแหน่งคนทำ</th>
-                                <th style="width: 105px;">สถานะ</th>
-                                <th style="width: 110px;">วันที่ส่งตรวจ</th>
-                                <th style="width: 110px;">วันที่เซ็นรับรอง</th>
-                                <th style="width: 110px;">วันที่เสร็จ</th>
+                                <th style="width: 100px;">วันที่รับงาน</th>
+                                <th style="width: auto;">รายละเอียดงาน</th>
+                                <th style="width: 180px;">เจ้าของงาน</th>
+                                <th style="width: 120px;">ตำแหน่งเจ้าของงาน</th>
+                                <th style="width: 180px;">ผู้รับผิดชอบ</th>
+                                <th style="width: 110px;">ตำแหน่งคนทำ</th>
+                                <th style="width: 100px;">สถานะ</th>
+                                <th style="width: 95px;">วันที่ส่งตรวจ</th>
+                                <th style="width: 95px;">วันที่เซ็นรับรอง</th>
+                                <th style="width: 95px;">วันที่เสร็จ</th>
                                 <th style="width: 45px;">จัดการ</th>
                             </tr>
                         </thead>
@@ -941,7 +941,7 @@
                     <textarea class="inline-edit" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobTitle', this.value)">${job.jobTitle}</textarea>
                 </td>
                 <td>
-                    <input type="text" class="inline-edit" value="${job.jobOwner}" onchange="updateJob(${job.id}, 'jobOwner', this.value)">
+                    <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobOwner', this.value)">${job.jobOwner}</textarea>
                 </td>
                 <td>
                     <select class="inline-edit" onchange="updateJob(${job.id}, 'jobOwnerPosition', this.value)">
@@ -949,7 +949,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="inline-edit" value="${job.assignee}" onchange="updateJob(${job.id}, 'assignee', this.value)">
+                    <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'assignee', this.value)">${job.assignee}</textarea>
                 </td>
                 <td>
                     <select class="inline-edit" onchange="updateJob(${job.id}, 'assigneePosition', this.value)">
