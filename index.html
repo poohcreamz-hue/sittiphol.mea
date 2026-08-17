@@ -115,6 +115,40 @@
             box-shadow: 0 4px 12px rgba(255, 107, 0, 0.25);
         }
 
+        .btn-guest {
+            width: 100%;
+            padding: 12px;
+            background-color: #64748b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-guest:hover {
+            background-color: #475569;
+        }
+
+        .divider {
+            margin: 18px 0;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85em;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .divider::before { margin-right: .5em; }
+        .divider::after { margin-left: .5em; }
+
         .error-msg {
             color: #ef4444;
             font-size: 0.88em;
@@ -147,6 +181,18 @@
             gap: 12px;
             border-left: 6px solid var(--mea-orange);
         }
+
+        .user-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.88em;
+            font-weight: 500;
+        }
+        .badge-admin { background-color: #dfe7ff; color: #1e40af; }
+        .badge-guest { background-color: #f1f5f9; color: #475569; }
 
         .nav-menu {
             display: flex;
@@ -265,14 +311,14 @@
             box-shadow: 0 4px 10px rgba(30, 41, 59, 0.2);
         }
 
-        .btn-logout {
-            background-color: #ef4444;
+        .btn-auth {
+            background-color: #3b82f6;
             padding: 8px 16px;
             font-size: 0.88em;
         }
 
-        .btn-logout:hover {
-            background-color: #dc2626;
+        .btn-auth:hover {
+            background-color: #2563eb;
         }
 
         .btn-delete {
@@ -430,6 +476,14 @@
             box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
         }
 
+        /* Read-only mode styling */
+        body.guest-mode .inline-edit {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            pointer-events: none;
+        }
+
         input[type="date"].inline-edit {
             font-size: 0.82em;
             padding: 2px 0;
@@ -453,7 +507,7 @@
         }
 
         /* ==========================================
-           PRINT & PDF STYLES (แสดงต่อเนื่องไม่เว้นวรรค)
+           PRINT & PDF STYLES
            ========================================== */
         @media print {
             body {
@@ -468,7 +522,7 @@
                 width: 100% !important;
             }
 
-            #loginScreen, .header-bar, .btn-logout, #jobForm, .filter-container, .btn-delete, h1, th:last-child, td:last-child {
+            #loginScreen, .header-bar, .btn-auth, #jobForm, .filter-container, .btn-delete, h1, .admin-only-col {
                 display: none !important;
             }
 
@@ -503,11 +557,11 @@
             }
 
             thead {
-                display: table-header-group !important; /* ให้หัวตารางแสดงซ้ำเวลากินพื้นที่ข้ามหน้า */
+                display: table-header-group !important;
             }
 
             tr {
-                page-break-inside: avoid !important; /* ป้องกันไม่ให้บรรทัดถูกตัดครึ่งกลาง */
+                page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
 
@@ -566,16 +620,20 @@
         <h2>⚡ ระบบบันทึกงาน กฟน.</h2>
         <form id="loginForm">
             <div class="login-field">
-                <label>ชื่อผู้ใช้งาน (Username)</label>
-                <input type="text" id="username" placeholder="กรอก Username" required autocomplete="username">
+                <label>ชื่อผู้ใช้งาน (Admin)</label>
+                <input type="text" id="username" placeholder="กรอก Username" autocomplete="username">
             </div>
             <div class="login-field">
                 <label>รหัสผ่าน (Password)</label>
-                <input type="password" id="password" placeholder="กรอก Password" required autocomplete="current-password">
+                <input type="password" id="password" placeholder="กรอก Password" autocomplete="current-password">
             </div>
-            <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
+            <button type="submit" class="btn-login">🔑 เข้าสู่ระบบ (แอดมิน)</button>
             <p id="errorMsg" class="error-msg">❌ Username หรือ Password ไม่ถูกต้อง!</p>
         </form>
+
+        <div class="divider">หรือ</div>
+
+        <button type="button" class="btn-guest" onclick="loginAsGuest()">👁️ เข้าชม (ดูอย่างเดียว ไม่ต้องใช้รหัส)</button>
     </div>
 </div>
 
@@ -589,7 +647,10 @@
                 <button class="nav-btn active" onclick="switchTab('attendanceTab', this)">📌 หน้าลงชื่อเข้าปฏิบัติงาน</button>
                 <button class="nav-btn" onclick="switchTab('tasksTab', this)">📋 ระบบติดตามภาระงานประจำวัน</button>
             </div>
-            <button class="btn btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="userStatusBadge" class="user-status-badge"></span>
+                <button id="authBtn" class="btn btn-auth" onclick="toggleAuth()"></button>
+            </div>
         </div>
 
         <!-- TAB 1: หน้าลงชื่อเข้างาน -->
@@ -599,9 +660,12 @@
                 <div class="attendance-box">
                     <p style="color: var(--text-muted); font-size: 1.05em;">เวลาปัจจุบัน</p>
                     <div class="clock-display" id="liveClock">00:00:00</div>
-                    <div class="attendance-actions">
+                    <div class="attendance-actions admin-only">
                         <button class="btn btn-checkin" onclick="recordAttendance('เข้างาน')">📥 ลงชื่อเข้างาน (Check-in)</button>
                         <button class="btn btn-checkout" onclick="recordAttendance('เลิกงาน')">📤 ลงชื่อเลิกงาน (Check-out)</button>
+                    </div>
+                    <div class="guest-only" style="display: none; color: #64748b; font-size: 0.9em; margin-top: 10px;">
+                        * โหมดดูอย่างเดียว: เฉพาะแอดมินเท่านั้นที่สามารถลงชื่อเข้า-เลิกงานได้
                     </div>
                 </div>
 
@@ -611,11 +675,11 @@
                     <table style="width: 100%;">
                         <thead>
                             <tr>
-                                <th style="width: 15%;">วันที่</th>
-                                <th style="width: 20%;">ประเภท</th>
-                                <th style="width: 20%;">เวลาบันทึก</th>
-                                <th style="width: 25%;">ผู้บันทึก</th>
-                                <th style="width: 20%;">จัดการ</th>
+                                <th style="width: 20%;">วันที่</th>
+                                <th style="width: 25%;">ประเภท</th>
+                                <th style="width: 25%;">เวลาบันทึก</th>
+                                <th style="width: 35%;">ผู้บันทึก</th>
+                                <th class="admin-only-col" style="width: 15%;">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="attendanceTableBody">
@@ -628,8 +692,8 @@
 
         <!-- TAB 2: ระบบติดตามภาระงาน -->
         <div id="tasksTab" class="tab-content">
-            <!-- SECTION 1: เพิ่มรายการงานใหม่ -->
-            <div class="card">
+            <!-- SECTION 1: เพิ่มรายการงานใหม่ (เฉพาะ ADMIN) -->
+            <div class="card admin-only" id="addNewTaskCard">
                 <h2>➕ บันทึกงานใหม่ / มอบหมายงาน</h2>
                 <form id="jobForm">
                     <div class="form-grid">
@@ -735,6 +799,8 @@
     const AUTH_USER = "sittiphol.mea";
     const AUTH_PASS = "0806694271";
 
+    let isAdmin = false;
+
     const positions = [
         "หัวหน้าแผนก บร.2",
         "ชผ.บร.2",
@@ -753,8 +819,16 @@
 
     // Check Login Session on Load
     window.addEventListener('DOMContentLoaded', () => {
-        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        const authRole = sessionStorage.getItem('userRole');
+        if (authRole === 'admin') {
+            isAdmin = true;
             showMainApp();
+        } else if (authRole === 'guest') {
+            isAdmin = false;
+            showMainApp();
+        } else {
+            // Default: เข้าดูแบบ Guest โดยตรงหากเข้าผ่านลิ้งก์
+            loginAsGuest();
         }
     });
 
@@ -766,7 +840,8 @@
         const errorMsg = document.getElementById('errorMsg');
 
         if (userInput === AUTH_USER && passInput === AUTH_PASS) {
-            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userRole', 'admin');
+            isAdmin = true;
             errorMsg.style.display = 'none';
             showMainApp();
         } else {
@@ -774,17 +849,51 @@
         }
     });
 
+    function loginAsGuest() {
+        sessionStorage.setItem('userRole', 'guest');
+        isAdmin = false;
+        showMainApp();
+    }
+
     function showMainApp() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
+
+        const badge = document.getElementById('userStatusBadge');
+        const authBtn = document.getElementById('authBtn');
+
+        if (isAdmin) {
+            document.body.classList.remove('guest-mode');
+            badge.className = "user-status-badge badge-admin";
+            badge.innerHTML = "👨‍💻 สิทธิ์: แอดมิน (แก้ไขได้)";
+            authBtn.innerText = "🚪 ออกจากระบบ";
+            
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            document.querySelectorAll('.guest-only').forEach(el => el.style.display = 'none');
+        } else {
+            document.body.classList.add('guest-mode');
+            badge.className = "user-status-badge badge-guest";
+            badge.innerHTML = "👁️ สิทธิ์: ผู้เข้าชม (ดูอย่างเดียว)";
+            authBtn.innerText = "🔑 เข้าสู่ระบบแอดมิน";
+            
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.guest-only').forEach(el => el.style.display = 'block');
+        }
+
         initApp();
     }
 
-    function logout() {
-        sessionStorage.removeItem('isLoggedIn');
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('loginForm').reset();
+    function toggleAuth() {
+        if (isAdmin) {
+            sessionStorage.removeItem('userRole');
+            isAdmin = false;
+            loginAsGuest();
+        } else {
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMsg').style.display = 'none';
+        }
     }
 
     // TAB SWITCHING FUNCTION
@@ -809,6 +918,7 @@
        ATTENDANCE FUNCTIONS
        ========================================== */
     function recordAttendance(type) {
+        if (!isAdmin) return;
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0];
         const timeStr = now.toLocaleTimeString('th-TH');
@@ -828,6 +938,7 @@
     }
 
     function deleteAttendance(id) {
+        if (!isAdmin) return;
         if (confirm('คุณต้องการลบรายการลงชื่อนี้ใช่หรือไม่?')) {
             attendanceLogs = attendanceLogs.filter(a => a.id !== id);
             localStorage.setItem('myAttendanceLogs', JSON.stringify(attendanceLogs));
@@ -839,8 +950,10 @@
         const tbody = document.getElementById('attendanceTableBody');
         tbody.innerHTML = '';
 
+        const colSpanCount = isAdmin ? 5 : 4;
+
         if (attendanceLogs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888;">ยังไม่มีประวัติการลงชื่อ</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${colSpanCount}" style="text-align:center; color:#888;">ยังไม่มีประวัติการลงชื่อ</td></tr>`;
             return;
         }
 
@@ -852,9 +965,7 @@
                 <td style="text-align: center; ${typeColor}">${log.type === 'เข้างาน' ? '📥 เข้างาน' : '📤 เลิกงาน'}</td>
                 <td style="text-align: center;">${log.time} น.</td>
                 <td style="text-align: center;">${log.user}</td>
-                <td style="text-align: center;">
-                    <button class="btn btn-delete" onclick="deleteAttendance(${log.id})">ลบ</button>
-                </td>
+                ${isAdmin ? `<td style="text-align: center;" class="admin-only-col"><button class="btn btn-delete" onclick="deleteAttendance(${log.id})">ลบ</button></td>` : ''}
             `;
             tbody.appendChild(tr);
         });
@@ -881,6 +992,7 @@
 
     document.getElementById('jobForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        if (!isAdmin) return;
 
         const newJob = {
             id: Date.now(),
@@ -910,6 +1022,7 @@
     }
 
     function updateJob(id, field, value) {
+        if (!isAdmin) return;
         const index = jobs.findIndex(j => j.id === id);
         if (index !== -1) {
             jobs[index][field] = value;
@@ -929,6 +1042,7 @@
     }
 
     function deleteJob(id) {
+        if (!isAdmin) return;
         if (confirm('คุณต้องการลบรายการงานนี้ใช่หรือไม่?')) {
             jobs = jobs.filter(j => j.id !== id);
             saveAndRenderJobs();
@@ -991,7 +1105,7 @@
                     <th style="width: 8.5%;">สถานะ</th>
                     <th style="width: 13%;">ผู้ตรวจทาน / ส่งตรวจ / เซ็น</th>
                     <th style="width: 10.5%;">ผู้อนุมัติ / วันที่เซ็น</th>
-                    <th style="width: 35px;">จัดการ</th>
+                    ${isAdmin ? `<th class="admin-only-col" style="width: 35px;">จัดการ</th>` : ''}
                 </tr>
             </thead>
         `;
@@ -1025,13 +1139,15 @@
             ⏳ ยังไม่เสร็จ ${pendingCount}
         `;
 
+        const totalCols = isAdmin ? 10 : 9;
+
         if (filteredJobs.length === 0) {
             container.innerHTML = `
                 <div class="table-responsive">
                     <table style="width: 100%;">
                         ${getTableHeaderHTML()}
                         <tbody>
-                            <tr><td colspan="10" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>
+                            <tr><td colspan="${totalCols}" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1041,11 +1157,12 @@
 
         filteredJobs.sort((a, b) => new Date(a.receivedDate) - new Date(b.receivedDate));
 
-        // เรนเดอร์เป็นตารางเดียวยาวต่อเนื่อง
         const tableWrapper = document.createElement('div');
         tableWrapper.className = 'table-responsive';
         
         let tbodyHTML = '';
+        const disabledAttr = isAdmin ? '' : 'disabled readonly';
+
         filteredJobs.forEach(job => {
             const statusClass = getStatusClass(job.status);
             const reviewVal = (job.reviewDate && job.reviewDate !== '-') ? job.reviewDate : '';
@@ -1060,29 +1177,29 @@
             tbodyHTML += `
                 <tr>
                     <td>
-                        <input type="date" class="inline-edit" value="${job.receivedDate}" onchange="updateJob(${job.id}, 'receivedDate', this.value)">
+                        <input type="date" class="inline-edit" value="${job.receivedDate}" ${disabledAttr} onchange="updateJob(${job.id}, 'receivedDate', this.value)">
                     </td>
                     <td>
-                        <textarea class="inline-edit" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobTitle', this.value)">${job.jobTitle || ''}</textarea>
+                        <textarea class="inline-edit" ${disabledAttr} oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobTitle', this.value)">${job.jobTitle || ''}</textarea>
                     </td>
                     <td>
-                        <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobOwner', this.value)">${job.jobOwner}</textarea>
+                        <textarea class="inline-edit" rows="1" ${disabledAttr} oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobOwner', this.value)">${job.jobOwner}</textarea>
                     </td>
                     <td>
-                        <select class="inline-edit" onchange="updateJob(${job.id}, 'jobOwnerPosition', this.value)">
+                        <select class="inline-edit" ${disabledAttr} onchange="updateJob(${job.id}, 'jobOwnerPosition', this.value)">
                             ${generatePositionOptions(job.jobOwnerPosition || 'หัวหน้าแผนก บร.2')}
                         </select>
                     </td>
                     <td>
-                        <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'assignee', this.value)">${job.assignee}</textarea>
+                        <textarea class="inline-edit" rows="1" ${disabledAttr} oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'assignee', this.value)">${job.assignee}</textarea>
                     </td>
                     <td>
-                        <select class="inline-edit" onchange="updateJob(${job.id}, 'assigneePosition', this.value)">
+                        <select class="inline-edit" ${disabledAttr} onchange="updateJob(${job.id}, 'assigneePosition', this.value)">
                             ${generatePositionOptions(job.assigneePosition || 'ช่างไฟฟ้า')}
                         </select>
                     </td>
                     <td>
-                        <select class="inline-edit ${statusClass}" onchange="updateJob(${job.id}, 'status', this.value)">
+                        <select class="inline-edit ${statusClass}" ${disabledAttr} onchange="updateJob(${job.id}, 'status', this.value)">
                             <option value="ยังไม่เสร็จ" ${currentStatus === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
                             <option value="รอผู้ตรวจทานเซ็น" ${currentStatus === 'รอผู้ตรวจทานเซ็น' ? 'selected' : ''}>🔍 รอผู้ตรวจทานเซ็น</option>
                             <option value="รอผู้อนุมัติเซ็น" ${currentStatus === 'รอผู้อนุมัติเซ็น' ? 'selected' : ''}>📑 รอผู้อนุมัติเซ็น</option>
@@ -1091,29 +1208,30 @@
                     </td>
                     <td>
                         <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <input type="text" class="inline-edit" style="font-weight: 500;" placeholder="ชื่อคนตรวจ" value="${job.reviewer || ''}" onchange="updateJob(${job.id}, 'reviewer', this.value)">
+                            <input type="text" class="inline-edit" style="font-weight: 500;" placeholder="ชื่อคนตรวจ" value="${job.reviewer || ''}" ${disabledAttr} onchange="updateJob(${job.id}, 'reviewer', this.value)">
                             <div style="display: flex; gap: 2px; align-items: center; font-size: 0.8em; color: var(--text-muted);">
                                 <span>ส่ง:</span>
-                                <input type="date" class="inline-edit" value="${reviewVal}" onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
+                                <input type="date" class="inline-edit" value="${reviewVal}" ${disabledAttr} onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
                             </div>
                             <div style="display: flex; gap: 2px; align-items: center; font-size: 0.8em; color: var(--text-muted);">
                                 <span>เซ็น:</span>
-                                <input type="date" class="inline-edit" value="${reviewerSignedVal}" onchange="updateJob(${job.id}, 'reviewerSignedDate', this.value || '-')">
+                                <input type="date" class="inline-edit" value="${reviewerSignedVal}" ${disabledAttr} onchange="updateJob(${job.id}, 'reviewerSignedDate', this.value || '-')">
                             </div>
                         </div>
                     </td>
                     <td>
                         <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <input type="text" class="inline-edit" style="font-weight: 500;" placeholder="ชื่อคนอนุมัติ" value="${job.approver || ''}" onchange="updateJob(${job.id}, 'approver', this.value)">
+                            <input type="text" class="inline-edit" style="font-weight: 500;" placeholder="ชื่อคนอนุมัติ" value="${job.approver || ''}" ${disabledAttr} onchange="updateJob(${job.id}, 'approver', this.value)">
                             <div style="display: flex; gap: 2px; align-items: center; font-size: 0.8em; color: var(--text-muted);">
                                 <span>เซ็น:</span>
-                                <input type="date" class="inline-edit" value="${approverSignedVal}" onchange="updateJob(${job.id}, 'approverSignedDate', this.value || '-')">
+                                <input type="date" class="inline-edit" value="${approverSignedVal}" ${disabledAttr} onchange="updateJob(${job.id}, 'approverSignedDate', this.value || '-')">
                             </div>
                         </div>
                     </td>
-                    <td style="text-align: center;">
+                    ${isAdmin ? `
+                    <td style="text-align: center;" class="admin-only-col">
                         <button class="btn btn-delete" onclick="deleteJob(${job.id})">ลบ</button>
-                    </td>
+                    </td>` : ''}
                 </tr>
             `;
         });
