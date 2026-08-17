@@ -645,8 +645,8 @@
                             <label>ตำแหน่งเจ้าของงาน</label>
                             <select id="jobOwnerPosition" required>
                                 <option value="หัวหน้าแผนก บร.2">หัวหน้าแผนก บร.2</option>
-                                <option value="ผู้ช่วยหัวหน้าแผนก บร.2">ผู้ช่วยหัวหน้าแผนก บร.2</option>
-                                <option value="ช่างเทคนิคไฟฟ้า 6">ช่างเทคนิคไฟฟ้า 6</option>
+                                <option value="ชผ.บร.2">ชผ.บร.2</option>
+                                <option value="ชทฟ.6">ชทฟ.6</option>
                                 <option value="ช่างไฟฟ้า">ช่างไฟฟ้า</option>
                             </select>
                         </div>
@@ -658,8 +658,8 @@
                             <label>ตำแหน่งคนทำ</label>
                             <select id="assigneePosition" required>
                                 <option value="ช่างไฟฟ้า">ช่างไฟฟ้า</option>
-                                <option value="ช่างเทคนิคไฟฟ้า 6">ช่างเทคนิคไฟฟ้า 6</option>
-                                <option value="ผู้ช่วยหัวหน้าแผนก บร.2">ผู้ช่วยหัวหน้าแผนก บร.2</option>
+                                <option value="ชทฟ.6">ชทฟ.6</option>
+                                <option value="ชผ.บร.2">ชผ.บร.2</option>
                                 <option value="หัวหน้าแผนก บร.2">หัวหน้าแผนก บร.2</option>
                             </select>
                         </div>
@@ -733,8 +733,8 @@
 
     const positions = [
         "หัวหน้าแผนก บร.2",
-        "ผู้ช่วยหัวหน้าแผนก บร.2",
-        "ช่างเทคนิคไฟฟ้า 6",
+        "ชผ.บร.2",
+        "ชทฟ.6",
         "ช่างไฟฟ้า"
     ];
 
@@ -937,8 +937,13 @@
     }
 
     function generatePositionOptions(selectedPosition) {
+        // Map old detailed position names to new short forms if matched
+        let currentPos = selectedPosition;
+        if (currentPos === "ผู้ช่วยหัวหน้าแผนก บร.2") currentPos = "ชผ.บร.2";
+        if (currentPos === "ช่างเทคนิคไฟฟ้า 6") currentPos = "ชทฟ.6";
+
         return positions.map(pos => 
-            `<option value="${pos}" ${pos === selectedPosition ? 'selected' : ''}>${pos}</option>`
+            `<option value="${pos}" ${pos === currentPos ? 'selected' : ''}>${pos}</option>`
         ).join('');
     }
 
