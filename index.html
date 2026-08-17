@@ -334,6 +334,7 @@
             overflow-x: auto;
             border-radius: 8px;
             border: 1px solid var(--border-light);
+            margin-bottom: 16px;
         }
 
         table {
@@ -447,7 +448,7 @@
         }
 
         /* ==========================================
-           PRINT & PDF STYLES
+           PRINT & PDF STYLES (ตัดหน้าทุกๆ 10 รายการ)
            ========================================== */
         @media print {
             body {
@@ -485,6 +486,18 @@
             .table-responsive {
                 overflow: visible !important;
                 border: none !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* สั่งให้แต่ละตารางย่อย (10 รายการ) ขึ้นหน้าใหม่เสมอ */
+            .table-chunk-print {
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+
+            .table-chunk-print:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
             }
 
             table {
@@ -492,6 +505,7 @@
                 min-width: 100% !important;
                 border: 1px solid #000 !important;
                 table-layout: auto !important;
+                margin-bottom: 0 !important;
             }
 
             th, td {
@@ -691,27 +705,9 @@
                     <!-- สรุปสถิติจะถูกใส่ที่นี่ด้วย JS -->
                 </div>
 
-                <div class="table-responsive">
-                    <table style="width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="width: 7%;">วันที่รับงาน</th>
-                                <th style="width: 27%;">รายละเอียดงาน</th>
-                                <th style="width: 12%;">เจ้าของงาน</th>
-                                <th style="width: 11%;">ตำแหน่งเจ้าของงาน</th>
-                                <th style="width: 12%;">ผู้รับผิดชอบ</th>
-                                <th style="width: 10%;">ตำแหน่งคนทำ</th>
-                                <th style="width: 8%;">สถานะ</th>
-                                <th style="width: 7%;">วันที่ส่งตรวจ</th>
-                                <th style="width: 7%;">วันที่เซ็นรับรอง</th>
-                                <th style="width: 7%;">วันที่เสร็จ</th>
-                                <th style="width: 40px;">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="jobTableBody">
-                            <!-- รายการงานจะมาแสดงที่นี่ -->
-                        </tbody>
-                    </table>
+                <!-- คอนเทนเนอร์สำหรับเรนเดอร์ตาราง (แบ่งตารางย่อยละ 10 รายการ) -->
+                <div id="jobTablesContainer">
+                    <!-- ตารางงานจะถูกเรนเดอร์ย่อยตรงนี้ -->
                 </div>
             </div>
         </div>
@@ -958,9 +954,30 @@
         }
     }
 
+    // ฟังก์ชันช่วยสร้าง HTML ของ Table Header
+    function getTableHeaderHTML() {
+        return `
+            <thead>
+                <tr>
+                    <th style="width: 7%;">วันที่รับงาน</th>
+                    <th style="width: 27%;">รายละเอียดงาน</th>
+                    <th style="width: 12%;">เจ้าของงาน</th>
+                    <th style="width: 11%;">ตำแหน่งเจ้าของงาน</th>
+                    <th style="width: 12%;">ผู้รับผิดชอบ</th>
+                    <th style="width: 10%;">ตำแหน่งคนทำ</th>
+                    <th style="width: 8%;">สถานะ</th>
+                    <th style="width: 7%;">วันที่ส่งตรวจ</th>
+                    <th style="width: 7%;">วันที่เซ็นรับรอง</th>
+                    <th style="width: 7%;">วันที่เสร็จ</th>
+                    <th style="width: 40px;">จัดการ</th>
+                </tr>
+            </thead>
+        `;
+    }
+
     function renderJobs() {
-        const tbody = document.getElementById('jobTableBody');
-        tbody.innerHTML = '';
+        const container = document.getElementById('jobTablesContainer');
+        container.innerHTML = '';
 
         const monthFilter = document.getElementById('monthFilter').value;
 
@@ -987,66 +1004,95 @@
         `;
 
         if (filteredJobs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>`;
+            container.innerHTML = `
+                <div class="table-responsive">
+                    <table style="width: 100%;">
+                        ${getTableHeaderHTML()}
+                        <tbody>
+                            <tr><td colspan="11" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
             return;
         }
 
         filteredJobs.sort((a, b) => new Date(a.receivedDate) - new Date(b.receivedDate));
 
-        filteredJobs.forEach(job => {
-            const tr = document.createElement('tr');
-            const statusClass = getStatusClass(job.status);
+        // แบ่งข้อมูลออกเป็นชุด ละ 10 รายการ
+        const chunkSize = 10;
+        for (let i = 0; i < filteredJobs.length; i += chunkSize) {
+            const chunk = filteredJobs.slice(i, i + chunkSize);
+            
+            const tableWrapper = document.createElement('div');
+            tableWrapper.className = 'table-responsive table-chunk-print';
+            
+            let tbodyHTML = '';
+            chunk.forEach(job => {
+                const statusClass = getStatusClass(job.status);
+                const reviewVal = (job.reviewDate && job.reviewDate !== '-') ? job.reviewDate : '';
+                const signedVal = (job.signedDate && job.signedDate !== '-') ? job.signedDate : '';
+                const completedVal = (job.completedDate && job.completedDate !== '-') ? job.completedDate : '';
 
-            const reviewVal = (job.reviewDate && job.reviewDate !== '-') ? job.reviewDate : '';
-            const signedVal = (job.signedDate && job.signedDate !== '-') ? job.signedDate : '';
-            const completedVal = (job.completedDate && job.completedDate !== '-') ? job.completedDate : '';
+                tbodyHTML += `
+                    <tr>
+                        <td>
+                            <input type="date" class="inline-edit" value="${job.receivedDate}" onchange="updateJob(${job.id}, 'receivedDate', this.value)">
+                        </td>
+                        <td>
+                            <textarea class="inline-edit" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobTitle', this.value)">${job.jobTitle || ''}</textarea>
+                        </td>
+                        <td>
+                            <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobOwner', this.value)">${job.jobOwner}</textarea>
+                        </td>
+                        <td>
+                            <select class="inline-edit" onchange="updateJob(${job.id}, 'jobOwnerPosition', this.value)">
+                                ${generatePositionOptions(job.jobOwnerPosition || 'หัวหน้าแผนก บร.2')}
+                            </select>
+                        </td>
+                        <td>
+                            <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'assignee', this.value)">${job.assignee}</textarea>
+                        </td>
+                        <td>
+                            <select class="inline-edit" onchange="updateJob(${job.id}, 'assigneePosition', this.value)">
+                                ${generatePositionOptions(job.assigneePosition || 'ช่างไฟฟ้า')}
+                            </select>
+                        </td>
+                        <td>
+                            <select class="inline-edit ${statusClass}" onchange="updateJob(${job.id}, 'status', this.value)">
+                                <option value="ยังไม่เสร็จ" ${job.status === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
+                                <option value="รอตรวจ" ${job.status === 'รอตรวจ' ? 'selected' : ''}>🔍 รอตรวจ</option>
+                                <option value="เซ็นรับรองแล้ว" ${job.status === 'เซ็นรับรองแล้ว' ? 'selected' : ''}>📑 เซ็นรับรองแล้ว</option>
+                                <option value="งานเสร็จแล้ว" ${(job.status === 'งานเสร็จแล้ว' || job.status === 'เสร็จแล้ว') ? 'selected' : ''}>✅ งานเสร็จแล้ว</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="date" class="inline-edit" value="${reviewVal}" onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
+                        </td>
+                        <td>
+                            <input type="date" class="inline-edit" value="${signedVal}" onchange="updateJob(${job.id}, 'signedDate', this.value || '-')">
+                        </td>
+                        <td>
+                            <input type="date" class="inline-edit" value="${completedVal}" onchange="updateJob(${job.id}, 'completedDate', this.value || '-')">
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn btn-delete" onclick="deleteJob(${job.id})">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            });
 
-            tr.innerHTML = `
-                <td>
-                    <input type="date" class="inline-edit" value="${job.receivedDate}" onchange="updateJob(${job.id}, 'receivedDate', this.value)">
-                </td>
-                <td>
-                    <textarea class="inline-edit" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobTitle', this.value)">${job.jobTitle || ''}</textarea>
-                </td>
-                <td>
-                    <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'jobOwner', this.value)">${job.jobOwner}</textarea>
-                </td>
-                <td>
-                    <select class="inline-edit" onchange="updateJob(${job.id}, 'jobOwnerPosition', this.value)">
-                        ${generatePositionOptions(job.jobOwnerPosition || 'หัวหน้าแผนก บร.2')}
-                    </select>
-                </td>
-                <td>
-                    <textarea class="inline-edit" rows="1" oninput="autoResizeTextarea(this)" onchange="updateJob(${job.id}, 'assignee', this.value)">${job.assignee}</textarea>
-                </td>
-                <td>
-                    <select class="inline-edit" onchange="updateJob(${job.id}, 'assigneePosition', this.value)">
-                        ${generatePositionOptions(job.assigneePosition || 'ช่างไฟฟ้า')}
-                    </select>
-                </td>
-                <td>
-                    <select class="inline-edit ${statusClass}" onchange="updateJob(${job.id}, 'status', this.value)">
-                        <option value="ยังไม่เสร็จ" ${job.status === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
-                        <option value="รอตรวจ" ${job.status === 'รอตรวจ' ? 'selected' : ''}>🔍 รอตรวจ</option>
-                        <option value="เซ็นรับรองแล้ว" ${job.status === 'เซ็นรับรองแล้ว' ? 'selected' : ''}>📑 เซ็นรับรองแล้ว</option>
-                        <option value="งานเสร็จแล้ว" ${(job.status === 'งานเสร็จแล้ว' || job.status === 'เสร็จแล้ว') ? 'selected' : ''}>✅ งานเสร็จแล้ว</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="date" class="inline-edit" value="${reviewVal}" onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
-                </td>
-                <td>
-                    <input type="date" class="inline-edit" value="${signedVal}" onchange="updateJob(${job.id}, 'signedDate', this.value || '-')">
-                </td>
-                <td>
-                    <input type="date" class="inline-edit" value="${completedVal}" onchange="updateJob(${job.id}, 'completedDate', this.value || '-')">
-                </td>
-                <td style="text-align: center;">
-                    <button class="btn btn-delete" onclick="deleteJob(${job.id})">ลบ</button>
-                </td>
+            tableWrapper.innerHTML = `
+                <table style="width: 100%;">
+                    ${getTableHeaderHTML()}
+                    <tbody>
+                        ${tbodyHTML}
+                    </tbody>
+                </table>
             `;
-            tbody.appendChild(tr);
-        });
+
+            container.appendChild(tableWrapper);
+        }
 
         setTimeout(() => {
             document.querySelectorAll('textarea.inline-edit').forEach(ta => autoResizeTextarea(ta));
