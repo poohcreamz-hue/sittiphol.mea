@@ -311,6 +311,15 @@
             box-shadow: 0 4px 10px rgba(30, 41, 59, 0.2);
         }
 
+        .btn-print-selected {
+            background-color: #059669;
+        }
+
+        .btn-print-selected:hover {
+            background-color: #047857;
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+        }
+
         .btn-auth {
             background-color: #3b82f6;
             padding: 8px 16px;
@@ -420,7 +429,7 @@
         /* Filter Controls */
         .filter-container {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
             margin-bottom: 16px;
             flex-wrap: wrap;
@@ -476,6 +485,14 @@
             box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
         }
 
+        /* Checkbox styling */
+        .print-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--mea-orange);
+        }
+
         /* Read-only mode styling */
         body.guest-mode .inline-edit {
             border: none !important;
@@ -522,7 +539,12 @@
                 width: 100% !important;
             }
 
-            #loginScreen, .header-bar, .btn-auth, #jobForm, .filter-container, .btn-delete, h1, .admin-only-col {
+            #loginScreen, .header-bar, .btn-auth, #jobForm, .filter-container, .btn-delete, h1, .admin-only-col, .print-col {
+                display: none !important;
+            }
+
+            /* ซ่อนแถวที่ไม่ถูกเลือกเวลาสั่งพิมพ์แบบเลือก */
+            body.print-selection-mode tr:not(.print-selected-row):not(:first-child) {
                 display: none !important;
             }
 
@@ -777,7 +799,8 @@
                     <label><strong>เลือกดูข้อมูลเดือน/ปี:</strong></label>
                     <input type="month" id="monthFilter" onchange="renderJobs()">
                     <button type="button" class="btn" style="background-color: var(--mea-navy-light);" onclick="resetFilter()">แสดงทั้งหมด</button>
-                    <button type="button" class="btn btn-print" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF รายงานประจำเดือน</button>
+                    <button type="button" class="btn btn-print-selected" onclick="printSelectedJobs()">🖨️ พิมพ์เฉพาะงานที่เลือก</button>
+                    <button type="button" class="btn btn-print" onclick="printAllJobs()">🖨️ พิมพ์ทั้งหมด</button>
                 </div>
 
                 <div class="print-summary" id="printSummary">
@@ -1054,6 +1077,74 @@
         renderJobs();
     }
 
+    function toggleSelectAll(selectAllCheckbox) {
+        const checkboxes = document.querySelectorAll('.job-select-chk');
+        checkboxes.forEach(chk => {
+            chk.checked = selectAllCheckbox.checked;
+            toggleRowSelectedClass(chk);
+        });
+    }
+
+    function toggleRowSelectedClass(checkbox) {
+        const row = checkbox.closest('tr');
+        if (checkbox.checked) {
+            row.classList.add('print-selected-row');
+        } else {
+            row.classList.remove('print-selected-row');
+        }
+    }
+
+    function updateSummaryStats(jobList) {
+        const monthFilter = document.getElementById('monthFilter').value;
+        const monthText = getThaiMonthYear(monthFilter);
+
+        const completedCount = jobList.filter(j => j.status === 'งานเสร็จสมบูรณ์' || j.status === 'งานเสร็จแล้ว' || j.status === 'เสร็จแล้ว').length;
+        const approverCount = jobList.filter(j => j.status === 'รอผู้อนุมัติเซ็น' || j.status === 'เซ็นรับรองแล้ว').length;
+        const reviewerCount = jobList.filter(j => j.status === 'รอผู้ตรวจทานเซ็น' || j.status === 'รอตรวจ').length;
+        const pendingCount = jobList.filter(j => j.status === 'ยังไม่เสร็จ' || !j.status).length;
+
+        document.getElementById('printSummary').innerHTML = `
+            <strong>สรุปภาพรวมการพิมพ์ (${monthText}):</strong> 
+            งานทั้งหมด ${jobList.length} รายการ | 
+            ✅ เสร็จสมบูรณ์ ${completedCount} | 
+            📑 รอผู้อนุมัติเซ็น ${approverCount} | 
+            🔍 รอผู้ตรวจทานเซ็น ${reviewerCount} | 
+            ⏳ ยังไม่เสร็จ ${pendingCount}
+        `;
+    }
+
+    function printSelectedJobs() {
+        const selectedCheckboxes = document.querySelectorAll('.job-select-chk:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('กรุณาติ๊กเลือกอย่างน้อย 1 รายการที่ต้องการพิมพ์ครับ');
+            return;
+        }
+
+        const selectedIds = Array.from(selectedCheckboxes).map(chk => parseInt(chk.getAttribute('data-id')));
+        const selectedJobsList = jobs.filter(j => selectedIds.includes(j.id));
+        
+        updateSummaryStats(selectedJobsList);
+        document.body.classList.add('print-selection-mode');
+        
+        window.print();
+
+        // รีเซ็ตสถิติกลับมาเปนทั้งหมดหลังพิมพ์
+        setTimeout(() => {
+            document.body.classList.remove('print-selection-mode');
+            const monthFilter = document.getElementById('monthFilter').value;
+            const filteredJobs = jobs.filter(job => !monthFilter || job.receivedDate.startsWith(monthFilter));
+            updateSummaryStats(filteredJobs);
+        }, 500);
+    }
+
+    function printAllJobs() {
+        const monthFilter = document.getElementById('monthFilter').value;
+        const filteredJobs = jobs.filter(job => !monthFilter || job.receivedDate.startsWith(monthFilter));
+        updateSummaryStats(filteredJobs);
+        document.body.classList.remove('print-selection-mode');
+        window.print();
+    }
+
     function generatePositionOptions(selectedPosition) {
         let currentPos = selectedPosition;
         if (currentPos === "ผู้ช่วยหัวหน้าแผนก บร.2") currentPos = "ชผ.บร.2";
@@ -1096,11 +1187,12 @@
         return `
             <thead>
                 <tr>
+                    <th class="print-col" style="width: 30px;"><input type="checkbox" class="print-checkbox" title="เลือกทั้งหมด" onchange="toggleSelectAll(this)"></th>
                     <th style="width: 7%;">วันที่รับงาน</th>
                     <th style="width: 19%;">รายละเอียดงาน</th>
-                    <th style="width: 13%;">เจ้าของงาน</th>
+                    <th style="width: 12%;">เจ้าของงาน</th>
                     <th style="width: 6.5%;">ตำแหน่ง</th>
-                    <th style="width: 13%;">ผู้รับผิดชอบ</th>
+                    <th style="width: 12%;">ผู้รับผิดชอบ</th>
                     <th style="width: 6.5%;">ตำแหน่ง</th>
                     <th style="width: 8.5%;">สถานะ</th>
                     <th style="width: 13%;">ผู้ตรวจทาน / ส่งตรวจ / เซ็น</th>
@@ -1125,21 +1217,9 @@
         const monthText = getThaiMonthYear(monthFilter);
         document.getElementById('reportHeader').innerText = `📁 รายงานสรุปการปฏิบัติงาน ประจำเดือน: ${monthText}`;
         
-        const completedCount = filteredJobs.filter(j => j.status === 'งานเสร็จสมบูรณ์' || j.status === 'งานเสร็จแล้ว' || j.status === 'เสร็จแล้ว').length;
-        const approverCount = filteredJobs.filter(j => j.status === 'รอผู้อนุมัติเซ็น' || j.status === 'เซ็นรับรองแล้ว').length;
-        const reviewerCount = filteredJobs.filter(j => j.status === 'รอผู้ตรวจทานเซ็น' || j.status === 'รอตรวจ').length;
-        const pendingCount = filteredJobs.filter(j => j.status === 'ยังไม่เสร็จ' || !j.status).length;
+        updateSummaryStats(filteredJobs);
 
-        document.getElementById('printSummary').innerHTML = `
-            <strong>สรุปภาพรวมประจำเดือน (${monthText}):</strong> 
-            งานทั้งหมด ${filteredJobs.length} รายการ | 
-            ✅ เสร็จสมบูรณ์ ${completedCount} | 
-            📑 รอผู้อนุมัติเซ็น ${approverCount} | 
-            🔍 รอผู้ตรวจทานเซ็น ${reviewerCount} | 
-            ⏳ ยังไม่เสร็จ ${pendingCount}
-        `;
-
-        const totalCols = isAdmin ? 10 : 9;
+        const totalCols = isAdmin ? 11 : 10;
 
         if (filteredJobs.length === 0) {
             container.innerHTML = `
@@ -1176,6 +1256,9 @@
 
             tbodyHTML += `
                 <tr>
+                    <td class="print-col">
+                        <input type="checkbox" class="print-checkbox job-select-chk" data-id="${job.id}" onchange="toggleRowSelectedClass(this)">
+                    </td>
                     <td>
                         <input type="date" class="inline-edit" value="${job.receivedDate}" ${disabledAttr} onchange="updateJob(${job.id}, 'receivedDate', this.value)">
                     </td>
