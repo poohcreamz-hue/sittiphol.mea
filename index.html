@@ -345,7 +345,7 @@
         }
 
         th, td {
-            padding: 8px 5px;
+            padding: 8px 4px;
             text-align: center;
             border-bottom: 1px solid var(--border-light);
             font-size: 0.85em;
@@ -358,7 +358,7 @@
             background-color: var(--mea-navy);
             color: white;
             font-size: 0.85em;
-            padding: 10px 5px;
+            padding: 10px 4px;
             font-weight: 500;
             letter-spacing: 0.3px;
         }
@@ -445,6 +445,11 @@
             line-height: 1.35;
             display: block;
             text-align: left;
+        }
+
+        select.inline-edit {
+            padding: 2px 0;
+            text-align-last: center;
         }
 
         /* ==========================================
@@ -937,7 +942,6 @@
     }
 
     function generatePositionOptions(selectedPosition) {
-        // Map old detailed position names to new short forms if matched
         let currentPos = selectedPosition;
         if (currentPos === "ผู้ช่วยหัวหน้าแผนก บร.2") currentPos = "ชผ.บร.2";
         if (currentPos === "ช่างเทคนิคไฟฟ้า 6") currentPos = "ชทฟ.6";
@@ -975,21 +979,21 @@
         }
     }
 
-    // ฟังก์ชันช่วยสร้าง HTML ของ Table Header
+    // ฟังก์ชันช่วยสร้าง HTML ของ Table Header (ปรับความกว้างช่องชื่อเจ้าของงาน/ผู้รับผิดชอบเพิ่มขึ้น และลดช่องตำแหน่งลง)
     function getTableHeaderHTML() {
         return `
             <thead>
                 <tr>
                     <th style="width: 7%;">วันที่รับงาน</th>
-                    <th style="width: 20%;">รายละเอียดงาน</th>
-                    <th style="width: 9%;">เจ้าของงาน</th>
-                    <th style="width: 9%;">ตำแหน่ง</th>
-                    <th style="width: 9%;">ผู้รับผิดชอบ</th>
-                    <th style="width: 8%;">ตำแหน่ง</th>
-                    <th style="width: 9%;">สถานะ</th>
-                    <th style="width: 14%;">ผู้ตรวจทาน / ส่งตรวจ / เซ็น</th>
-                    <th style="width: 11%;">ผู้อนุมัติ / วันที่เซ็น</th>
-                    <th style="width: 40px;">จัดการ</th>
+                    <th style="width: 19%;">รายละเอียดงาน</th>
+                    <th style="width: 13%;">เจ้าของงาน</th>
+                    <th style="width: 6.5%;">ตำแหน่ง</th>
+                    <th style="width: 13%;">ผู้รับผิดชอบ</th>
+                    <th style="width: 6.5%;">ตำแหน่ง</th>
+                    <th style="width: 8.5%;">สถานะ</th>
+                    <th style="width: 13%;">ผู้ตรวจทาน / ส่งตรวจ / เซ็น</th>
+                    <th style="width: 10.5%;">ผู้อนุมัติ / วันที่เซ็น</th>
+                    <th style="width: 35px;">จัดการ</th>
                 </tr>
             </thead>
         `;
@@ -1054,7 +1058,6 @@
                 const reviewerSignedVal = (job.reviewerSignedDate && job.reviewerSignedDate !== '-') ? job.reviewerSignedDate : (job.signedDate !== '-' ? job.signedDate : '');
                 const approverSignedVal = (job.approverSignedDate && job.approverSignedDate !== '-') ? job.approverSignedDate : (job.completedDate !== '-' ? job.completedDate : '');
 
-                // แปลงคำสถานะเก่าให้เป็นคำใหม่
                 let currentStatus = job.status;
                 if (currentStatus === 'รอตรวจ') currentStatus = 'รอผู้ตรวจทานเซ็น';
                 if (currentStatus === 'เซ็นรับรองแล้ว') currentStatus = 'รอผู้อนุมัติเซ็น';
