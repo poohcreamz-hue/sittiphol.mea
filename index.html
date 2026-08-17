@@ -130,7 +130,7 @@
         }
 
         .container {
-            max-width: 1750px;
+            max-width: 1850px;
             margin: 0 auto;
         }
 
@@ -345,10 +345,10 @@
         }
 
         th, td {
-            padding: 8px 6px;
+            padding: 8px 5px;
             text-align: center;
             border-bottom: 1px solid var(--border-light);
-            font-size: 0.88em;
+            font-size: 0.85em;
             vertical-align: middle;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -357,8 +357,8 @@
         th {
             background-color: var(--mea-navy);
             color: white;
-            font-size: 0.88em;
-            padding: 10px 6px;
+            font-size: 0.85em;
+            padding: 10px 5px;
             font-weight: 500;
             letter-spacing: 0.3px;
         }
@@ -406,8 +406,8 @@
         }
 
         .status-pending { background-color: #fef3c7; color: #b45309; }
-        .status-review { background-color: #fee2e2; color: #b91c1c; }
-        .status-signed { background-color: #e0f2fe; color: #0369a1; }
+        .status-reviewer { background-color: #fee2e2; color: #b91c1c; }
+        .status-approver { background-color: #e0f2fe; color: #0369a1; }
         .status-completed { background-color: #d1fae5; color: #047857; }
 
         /* Editable inputs inside table */
@@ -415,9 +415,9 @@
             border: 1px solid transparent;
             background: transparent;
             width: 100%;
-            padding: 4px 3px;
+            padding: 3px 2px;
             border-radius: 4px;
-            font-size: 0.9em;
+            font-size: 0.88em;
             color: var(--text-dark);
             text-align: inherit;
             transition: all 0.15s;
@@ -431,7 +431,7 @@
         }
 
         input[type="date"].inline-edit {
-            font-size: 0.85em;
+            font-size: 0.82em;
             padding: 2px 0;
             text-align: center;
         }
@@ -489,7 +489,6 @@
                 margin-bottom: 0 !important;
             }
 
-            /* สั่งให้แต่ละตารางย่อย (10 รายการ) ขึ้นหน้าใหม่เสมอ */
             .table-chunk-print {
                 page-break-after: always !important;
                 break-after: page !important;
@@ -510,8 +509,8 @@
 
             th, td {
                 border: 1px solid #000 !important;
-                padding: 4px 3px !important;
-                font-size: 8.5pt !important;
+                padding: 3px 2px !important;
+                font-size: 8pt !important;
                 word-break: break-word !important;
                 overflow-wrap: break-word !important;
                 white-space: normal !important;
@@ -531,7 +530,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 resize: none !important;
-                font-size: 8.5pt !important;
+                font-size: 8pt !important;
                 width: 100% !important;
                 height: auto !important;
                 min-height: auto !important;
@@ -668,22 +667,34 @@
                             <label>สถานะงาน</label>
                             <select id="status" onchange="toggleDateInputs()">
                                 <option value="ยังไม่เสร็จ">⏳ ยังไม่เสร็จ</option>
-                                <option value="รอตรวจ">🔍 รอตรวจ</option>
-                                <option value="เซ็นรับรองแล้ว">📑 เซ็นรับรองแล้ว</option>
-                                <option value="งานเสร็จแล้ว">✅ งานเสร็จแล้ว</option>
+                                <option value="รอผู้ตรวจทานเซ็น">🔍 รอผู้ตรวจทานเซ็น</option>
+                                <option value="รอผู้อนุมัติเซ็น">📑 รอผู้อนุมัติเซ็น</option>
+                                <option value="งานเสร็จสมบูรณ์">✅ งานเสร็จสมบูรณ์</option>
                             </select>
                         </div>
+                        
+                        <!-- สายการอนุมัติ: ผู้ตรวจทาน -->
                         <div class="form-group">
-                            <label>วันที่ส่งตรวจ</label>
+                            <label>ผู้ตรวจทาน (คนตรวจ)</label>
+                            <input type="text" id="reviewer" placeholder="ระบุชื่อคนตรวจทาน">
+                        </div>
+                        <div class="form-group">
+                            <label>วันที่ส่งตรวจทาน</label>
                             <input type="date" id="reviewDate">
                         </div>
                         <div class="form-group">
-                            <label>วันที่เซ็นรับรอง</label>
-                            <input type="date" id="signedDate">
+                            <label>วันที่ผู้ตรวจทานเซ็น</label>
+                            <input type="date" id="reviewerSignedDate">
+                        </div>
+
+                        <!-- สายการอนุมัติ: ผู้อนุมัติ -->
+                        <div class="form-group">
+                            <label>ผู้อนุมัติ (คนอนุมัติ)</label>
+                            <input type="text" id="approver" placeholder="ระบุชื่อคนอนุมัติ">
                         </div>
                         <div class="form-group">
-                            <label>วันที่งานเสร็จ</label>
-                            <input type="date" id="completedDate">
+                            <label>วันที่ผู้อนุมัติเซ็น (เสร็จ)</label>
+                            <input type="date" id="approverSignedDate">
                         </div>
                     </div>
                     <button type="submit" class="btn">บันทึกข้อมูลงาน</button>
@@ -851,16 +862,16 @@
     function toggleDateInputs() {
         const status = document.getElementById('status').value;
         const reviewInput = document.getElementById('reviewDate');
-        const signedInput = document.getElementById('signedDate');
-        const completedInput = document.getElementById('completedDate');
+        const reviewerSignedInput = document.getElementById('reviewerSignedDate');
+        const approverSignedInput = document.getElementById('approverSignedDate');
         const todayStr = new Date().toISOString().split('T')[0];
 
-        if (status === 'รอตรวจ' && !reviewInput.value) {
+        if (status === 'รอผู้ตรวจทานเซ็น' && !reviewInput.value) {
             reviewInput.value = todayStr;
-        } else if (status === 'เซ็นรับรองแล้ว' && !signedInput.value) {
-            signedInput.value = todayStr;
-        } else if ((status === 'งานเสร็จแล้ว' || status === 'เสร็จแล้ว') && !completedInput.value) {
-            completedInput.value = todayStr;
+        } else if (status === 'รอผู้อนุมัติเซ็น' && !reviewerSignedInput.value) {
+            reviewerSignedInput.value = todayStr;
+        } else if (status === 'งานเสร็จสมบูรณ์' && !approverSignedInput.value) {
+            approverSignedInput.value = todayStr;
         }
     }
 
@@ -876,9 +887,11 @@
             assignee: document.getElementById('assignee').value,
             assigneePosition: document.getElementById('assigneePosition').value,
             status: document.getElementById('status').value,
+            reviewer: document.getElementById('reviewer').value || '-',
             reviewDate: document.getElementById('reviewDate').value || '-',
-            signedDate: document.getElementById('signedDate').value || '-',
-            completedDate: document.getElementById('completedDate').value || '-'
+            reviewerSignedDate: document.getElementById('reviewerSignedDate').value || '-',
+            approver: document.getElementById('approver').value || '-',
+            approverSignedDate: document.getElementById('approverSignedDate').value || '-'
         };
 
         jobs.push(newJob);
@@ -899,12 +912,12 @@
             
             if (field === 'status') {
                 const today = new Date().toISOString().split('T')[0];
-                if (value === 'รอตรวจ') {
+                if (value === 'รอผู้ตรวจทานเซ็น') {
                     if (!jobs[index].reviewDate || jobs[index].reviewDate === '-') jobs[index].reviewDate = today;
-                } else if (value === 'เซ็นรับรองแล้ว') {
-                    if (!jobs[index].signedDate || jobs[index].signedDate === '-') jobs[index].signedDate = today;
-                } else if (value === 'งานเสร็จแล้ว' || value === 'เสร็จแล้ว') {
-                    if (!jobs[index].completedDate || jobs[index].completedDate === '-') jobs[index].completedDate = today;
+                } else if (value === 'รอผู้อนุมัติเซ็น') {
+                    if (!jobs[index].reviewerSignedDate || jobs[index].reviewerSignedDate === '-') jobs[index].reviewerSignedDate = today;
+                } else if (value === 'งานเสร็จสมบูรณ์') {
+                    if (!jobs[index].approverSignedDate || jobs[index].approverSignedDate === '-') jobs[index].approverSignedDate = today;
                 }
             }
             saveAndRenderJobs();
@@ -946,8 +959,11 @@
 
     function getStatusClass(status) {
         switch(status) {
-            case 'รอตรวจ': return 'status-review';
-            case 'เซ็นรับรองแล้ว': return 'status-signed';
+            case 'รอผู้ตรวจทานเซ็น':
+            case 'รอตรวจ': return 'status-reviewer';
+            case 'รอผู้อนุมัติเซ็น':
+            case 'เซ็นรับรองแล้ว': return 'status-approver';
+            case 'งานเสร็จสมบูรณ์': 
             case 'งานเสร็จแล้ว': 
             case 'เสร็จแล้ว': return 'status-completed';
             default: return 'status-pending';
@@ -960,15 +976,14 @@
             <thead>
                 <tr>
                     <th style="width: 7%;">วันที่รับงาน</th>
-                    <th style="width: 27%;">รายละเอียดงาน</th>
-                    <th style="width: 12%;">เจ้าของงาน</th>
-                    <th style="width: 11%;">ตำแหน่งเจ้าของงาน</th>
-                    <th style="width: 12%;">ผู้รับผิดชอบ</th>
-                    <th style="width: 10%;">ตำแหน่งคนทำ</th>
-                    <th style="width: 8%;">สถานะ</th>
-                    <th style="width: 7%;">วันที่ส่งตรวจ</th>
-                    <th style="width: 7%;">วันที่เซ็นรับรอง</th>
-                    <th style="width: 7%;">วันที่เสร็จ</th>
+                    <th style="width: 20%;">รายละเอียดงาน</th>
+                    <th style="width: 9%;">เจ้าของงาน</th>
+                    <th style="width: 9%;">ตำแหน่ง</th>
+                    <th style="width: 9%;">ผู้รับผิดชอบ</th>
+                    <th style="width: 8%;">ตำแหน่ง</th>
+                    <th style="width: 9%;">สถานะ</th>
+                    <th style="width: 14%;">ผู้ตรวจทาน / ส่งตรวจ / เซ็น</th>
+                    <th style="width: 11%;">ผู้อนุมัติ / วันที่เซ็น</th>
                     <th style="width: 40px;">จัดการ</th>
                 </tr>
             </thead>
@@ -989,17 +1004,17 @@
         const monthText = getThaiMonthYear(monthFilter);
         document.getElementById('reportHeader').innerText = `📁 รายงานสรุปการปฏิบัติงาน ประจำเดือน: ${monthText}`;
         
-        const completedCount = filteredJobs.filter(j => j.status === 'งานเสร็จแล้ว' || j.status === 'เสร็จแล้ว').length;
-        const signedCount = filteredJobs.filter(j => j.status === 'เซ็นรับรองแล้ว').length;
-        const reviewCount = filteredJobs.filter(j => j.status === 'รอตรวจ').length;
+        const completedCount = filteredJobs.filter(j => j.status === 'งานเสร็จสมบูรณ์' || j.status === 'งานเสร็จแล้ว' || j.status === 'เสร็จแล้ว').length;
+        const approverCount = filteredJobs.filter(j => j.status === 'รอผู้อนุมัติเซ็น' || j.status === 'เซ็นรับรองแล้ว').length;
+        const reviewerCount = filteredJobs.filter(j => j.status === 'รอผู้ตรวจทานเซ็น' || j.status === 'รอตรวจ').length;
         const pendingCount = filteredJobs.filter(j => j.status === 'ยังไม่เสร็จ' || !j.status).length;
 
         document.getElementById('printSummary').innerHTML = `
             <strong>สรุปภาพรวมประจำเดือน (${monthText}):</strong> 
             งานทั้งหมด ${filteredJobs.length} รายการ | 
-            ✅ งานเสร็จแล้ว ${completedCount} | 
-            📑 เซ็นรับรองแล้ว ${signedCount} | 
-            🔍 รอตรวจ ${reviewCount} | 
+            ✅ เสร็จสมบูรณ์ ${completedCount} | 
+            📑 รอผู้อนุมัติเซ็น ${approverCount} | 
+            🔍 รอผู้ตรวจทานเซ็น ${reviewerCount} | 
             ⏳ ยังไม่เสร็จ ${pendingCount}
         `;
 
@@ -1009,7 +1024,7 @@
                     <table style="width: 100%;">
                         ${getTableHeaderHTML()}
                         <tbody>
-                            <tr><td colspan="11" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>
+                            <tr><td colspan="10" style="text-align:center; color:#888;">ไม่พบข้อมูลงานประจำเดือนนี้</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1031,8 +1046,14 @@
             chunk.forEach(job => {
                 const statusClass = getStatusClass(job.status);
                 const reviewVal = (job.reviewDate && job.reviewDate !== '-') ? job.reviewDate : '';
-                const signedVal = (job.signedDate && job.signedDate !== '-') ? job.signedDate : '';
-                const completedVal = (job.completedDate && job.completedDate !== '-') ? job.completedDate : '';
+                const reviewerSignedVal = (job.reviewerSignedDate && job.reviewerSignedDate !== '-') ? job.reviewerSignedDate : (job.signedDate !== '-' ? job.signedDate : '');
+                const approverSignedVal = (job.approverSignedDate && job.approverSignedDate !== '-') ? job.approverSignedDate : (job.completedDate !== '-' ? job.completedDate : '');
+
+                // แปลงคำสถานะเก่าให้เป็นคำใหม่
+                let currentStatus = job.status;
+                if (currentStatus === 'รอตรวจ') currentStatus = 'รอผู้ตรวจทานเซ็น';
+                if (currentStatus === 'เซ็นรับรองแล้ว') currentStatus = 'รอผู้อนุมัติเซ็น';
+                if (currentStatus === 'งานเสร็จแล้ว' || currentStatus === 'เสร็จแล้ว') currentStatus = 'งานเสร็จสมบูรณ์';
 
                 tbodyHTML += `
                     <tr>
@@ -1060,20 +1081,33 @@
                         </td>
                         <td>
                             <select class="inline-edit ${statusClass}" onchange="updateJob(${job.id}, 'status', this.value)">
-                                <option value="ยังไม่เสร็จ" ${job.status === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
-                                <option value="รอตรวจ" ${job.status === 'รอตรวจ' ? 'selected' : ''}>🔍 รอตรวจ</option>
-                                <option value="เซ็นรับรองแล้ว" ${job.status === 'เซ็นรับรองแล้ว' ? 'selected' : ''}>📑 เซ็นรับรองแล้ว</option>
-                                <option value="งานเสร็จแล้ว" ${(job.status === 'งานเสร็จแล้ว' || job.status === 'เสร็จแล้ว') ? 'selected' : ''}>✅ งานเสร็จแล้ว</option>
+                                <option value="ยังไม่เสร็จ" ${currentStatus === 'ยังไม่เสร็จ' ? 'selected' : ''}>⏳ ยังไม่เสร็จ</option>
+                                <option value="รอผู้ตรวจทานเซ็น" ${currentStatus === 'รอผู้ตรวจทานเซ็น' ? 'selected' : ''}>🔍 รอผู้ตรวจทานเซ็น</option>
+                                <option value="รอผู้อนุมัติเซ็น" ${currentStatus === 'รอผู้อนุมัติเซ็น' ? 'selected' : ''}>📑 รอผู้อนุมัติเซ็น</option>
+                                <option value="งานเสร็จสมบูรณ์" ${currentStatus === 'งานเสร็จสมบูรณ์' ? 'selected' : ''}>✅ งานเสร็จสมบูรณ์</option>
                             </select>
                         </td>
                         <td>
-                            <input type="date" class="inline-edit" value="${reviewVal}" onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <input type="text" class="inline-edit" style="font-weight: 500;" placeholder="ชื่อคนตรวจ" value="${job.reviewer || ''}" onchange="updateJob(${job.id}, 'reviewer', this.value)">
+                                <div style="display: flex; gap: 2px; align-items: center; font-size: 0.8em; color: var(--text-muted);">
+                                    <span>ส่ง:</span>
+                                    <input type="date" class="inline-edit" value="${reviewVal}" onchange="updateJob(${job.id}, 'reviewDate', this.value || '-')">
+                                </div>
+                                <div style="display: flex; gap: 2px; align-items: center; font-size: 0.8em; color: var(--text-muted);">
+                                    <span>เซ็น:</span>
+                                    <input type="date" class="inline-edit" value="${reviewerSignedVal}" onchange="updateJob(${job.id}, 'reviewerSignedDate', this.value || '-')">
+                                </div>
+                            </div>
                         </td>
                         <td>
-                            <input type="date" class="inline-edit" value="${signedVal}" onchange="updateJob(${job.id}, 'signedDate', this.value || '-')">
-                        </td>
-                        <td>
-                            <input type="date" class="inline-edit" value="${completedVal}" onchange="updateJob(${job.id}, 'completedDate', this.value || '-')">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <input type="text" class="inline-edit" style="font-weight: 500;" placeholder="ชื่อคนอนุมัติ" value="${job.approver || ''}" onchange="updateJob(${job.id}, 'approver', this.value)">
+                                <div style="display: flex; gap: 2px; align-items: center; font-size: 0.8em; color: var(--text-muted);">
+                                    <span>เซ็น:</span>
+                                    <input type="date" class="inline-edit" value="${approverSignedVal}" onchange="updateJob(${job.id}, 'approverSignedDate', this.value || '-')">
+                                </div>
+                            </div>
                         </td>
                         <td style="text-align: center;">
                             <button class="btn btn-delete" onclick="deleteJob(${job.id})">ลบ</button>
