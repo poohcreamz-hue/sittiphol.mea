@@ -543,8 +543,8 @@
                 display: none !important;
             }
 
-            /* ซ่อนแถวที่ไม่ถูกเลือกเวลาสั่งพิมพ์แบบเลือก */
-            body.print-selection-mode tr:not(.print-selected-row):not(:first-child) {
+            /* แก้ไขส่วนนี้: ซ่อนทุกแถวใน tbody ที่ไม่ได้ติ๊กเลือกแบบเด็ดขาด */
+            body.print-selection-mode tbody tr:not(.print-selected-row) {
                 display: none !important;
             }
 
@@ -850,7 +850,6 @@
             isAdmin = false;
             showMainApp();
         } else {
-            // Default: เข้าดูแบบ Guest โดยตรงหากเข้าผ่านลิ้งก์
             loginAsGuest();
         }
     });
@@ -1120,6 +1119,11 @@
             return;
         }
 
+        // ซิงค์คลาส print-selected-row ให้แม่นยำ 100% กับทุก Checkbox ก่อนสั่งพิมพ์
+        document.querySelectorAll('.job-select-chk').forEach(chk => {
+            toggleRowSelectedClass(chk);
+        });
+
         const selectedIds = Array.from(selectedCheckboxes).map(chk => parseInt(chk.getAttribute('data-id')));
         const selectedJobsList = jobs.filter(j => selectedIds.includes(j.id));
         
@@ -1128,7 +1132,6 @@
         
         window.print();
 
-        // รีเซ็ตสถิติกลับมาเปนทั้งหมดหลังพิมพ์
         setTimeout(() => {
             document.body.classList.remove('print-selection-mode');
             const monthFilter = document.getElementById('monthFilter').value;
