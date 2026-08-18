@@ -246,6 +246,46 @@
             margin-bottom: 16px;
         }
 
+        /* DASHBOARD SUMMARY BADGES */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dash-card {
+            background: #ffffff;
+            padding: 16px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dash-card .title {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .dash-card .number {
+            font-size: 1.8em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .dash-completed { border-left: 5px solid #10b981; }
+        .dash-completed .number { color: #10b981; }
+
+        .dash-pending { border-left: 5px solid #f59e0b; }
+        .dash-pending .number { color: #f59e0b; }
+
+        .dash-total { border-left: 5px solid var(--mea-orange); }
+        .dash-total .number { color: var(--mea-orange); }
+
         /* Form Styling */
         .form-grid {
             display: grid;
@@ -539,11 +579,10 @@
                 width: 100% !important;
             }
 
-            #loginScreen, .header-bar, .btn-auth, #jobForm, .filter-container, .btn-delete, h1, .admin-only-col, .print-col {
+            #loginScreen, .header-bar, .btn-auth, #jobForm, .filter-container, .btn-delete, h1, .admin-only-col, .print-col, .dashboard-grid {
                 display: none !important;
             }
 
-            /* แก้ไขส่วนนี้: ซ่อนทุกแถวใน tbody ที่ไม่ได้ติ๊กเลือกแบบเด็ดขาด */
             body.print-selection-mode tbody tr:not(.print-selected-row) {
                 display: none !important;
             }
@@ -791,10 +830,35 @@
                 </form>
             </div>
 
-            <!-- SECTION 2: รายการงานทั้งหมด และตัวกรอง -->
+            <!-- SECTION 2: รายการงานทั้งหมด ตัวกรอง และ DASHBOARD สรุปยอด -->
             <div class="card">
                 <h2 id="reportHeader">📁 รายงานสรุปการปฏิบัติงาน</h2>
                 
+                <!-- DASHBOARD CARD สรุปยอดงาน -->
+                <div class="dashboard-grid">
+                    <div class="dash-card dash-completed">
+                        <div>
+                            <div class="title">✅ งานเสร็จสมบูรณ์</div>
+                            <div class="number" id="dashCompletedCount">0</div>
+                        </div>
+                        <span style="font-size: 2em;">🎉</span>
+                    </div>
+                    <div class="dash-card dash-pending">
+                        <div>
+                            <div class="title">⏳ งานที่เหลือ (กำลังดำเนินการ)</div>
+                            <div class="number" id="dashPendingCount">0</div>
+                        </div>
+                        <span style="font-size: 2em;">📌</span>
+                    </div>
+                    <div class="dash-card dash-total">
+                        <div>
+                            <div class="title">📊 งานทั้งหมดประจำช่วงนี้</div>
+                            <div class="number" id="dashTotalCount">0</div>
+                        </div>
+                        <span style="font-size: 2em;">📑</span>
+                    </div>
+                </div>
+
                 <div class="filter-container">
                     <label><strong>เลือกดูข้อมูลเดือน/ปี:</strong></label>
                     <input type="month" id="monthFilter" onchange="renderJobs()">
@@ -1101,14 +1165,21 @@
         const approverCount = jobList.filter(j => j.status === 'รอผู้อนุมัติเซ็น' || j.status === 'เซ็นรับรองแล้ว').length;
         const reviewerCount = jobList.filter(j => j.status === 'รอผู้ตรวจทานเซ็น' || j.status === 'รอตรวจ').length;
         const pendingCount = jobList.filter(j => j.status === 'ยังไม่เสร็จ' || !j.status).length;
+        
+        // งานที่เหลือรวมทุกสถานะที่ยังไม่เสร็จสมบูรณ์
+        const totalRemaining = approverCount + reviewerCount + pendingCount;
 
+        // ปรับปรุงตัวเลขบน Dashboard Card หน้าเว็บ
+        document.getElementById('dashCompletedCount').innerText = completedCount;
+        document.getElementById('dashPendingCount').innerText = totalRemaining;
+        document.getElementById('dashTotalCount').innerText = jobList.length;
+
+        // สรุปยอดในการพิมพ์
         document.getElementById('printSummary').innerHTML = `
             <strong>สรุปภาพรวมการพิมพ์ (${monthText}):</strong> 
             งานทั้งหมด ${jobList.length} รายการ | 
             ✅ เสร็จสมบูรณ์ ${completedCount} | 
-            📑 รอผู้อนุมัติเซ็น ${approverCount} | 
-            🔍 รอผู้ตรวจทานเซ็น ${reviewerCount} | 
-            ⏳ ยังไม่เสร็จ ${pendingCount}
+            ⏳ คงเหลือ ${totalRemaining} (รอผู้อนุมัติ ${approverCount} / รอผู้ตรวจทาน ${reviewerCount} / ยังไม่เสร็จ ${pendingCount})
         `;
     }
 
@@ -1119,7 +1190,6 @@
             return;
         }
 
-        // ซิงค์คลาส print-selected-row ให้แม่นยำ 100% กับทุก Checkbox ก่อนสั่งพิมพ์
         document.querySelectorAll('.job-select-chk').forEach(chk => {
             toggleRowSelectedClass(chk);
         });
